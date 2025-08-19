@@ -9,12 +9,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
-    .emoji-burst { position: fixed; inset: 0; pointer-events: none; overflow: visible; }
-    .emoji { position: absolute; will-change: transform, opacity; animation: floatUp 900ms ease-out forwards; }
-    @keyframes floatUp {
-      0% { transform: translate(var(--x, 0px), var(--y, 0px)) scale(0.8) rotate(0deg); opacity: 0; }
-      10% { opacity: 1; }
-      100% { transform: translate(var(--x, 0px), calc(var(--y, 0px) - 120px)) scale(1.15) rotate(20deg); opacity: 0; }
+    .emoji-burst { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 2000; }
+    .emoji { position: absolute; will-change: transform, opacity, filter; animation: burst 1400ms ease-out forwards; filter: drop-shadow(0 2px 2px rgba(0,0,0,.4)); }
+    @keyframes burst {
+      0% { transform: translate(0,0) scale(0.8) rotate(0deg); opacity: 0; }
+      12% { opacity: 1; }
+      100% { transform: translate(var(--dx, 0px), var(--dy, -160px)) scale(1.6) rotate(var(--rot, 25deg)); opacity: 0; }
     }
   </style>
   
@@ -45,7 +45,7 @@
         </div>
         <div class="form-group">
           <label for="studentId">Student ID</label>
-          <input id="studentId" name="studentId" class="input" type="text" placeholder="e.g., DR-205" required pattern="DR[- ]?[0-9]{3}" title="Format: DR-123, DR 123 or DR123">
+          <input id="studentId" name="studentId" class="input" type="text" placeholder="e.g., AD-205 or DR205" required pattern="[A-Za-z]{2}[- ]?[0-9]{3}" title="Two letters then optional '-' or space, then three digits. Examples: AD-205 or DR205" maxlength="6" autocomplete="off" inputmode="text">
         </div>
         <div class="form-group">
           <label for="year">Year</label>
@@ -70,11 +70,20 @@
 
   <!-- Success Modal -->
   <div id="successModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="successTitle">
-    <div class="modal-card">
+    <div class="modal-card success">
       <div id="successTitle" class="modal-title">Thank you!</div>
       <div class="modal-text" id="successBody"></div>
       <div id="successId" class="id-badge"></div>
       <button id="closeModal" class="btn btn-primary" type="button">Close</button>
+    </div>
+  </div>
+
+  <!-- Duplicate Modal -->
+  <div id="duplicateModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="dupTitle">
+    <div class="modal-card warning">
+      <div id="dupTitle" class="modal-title">Already registered</div>
+      <div class="modal-text">A form with this Student ID already exists. If you think this is a mistake, contact the coordinator.</div>
+      <button id="closeDup" class="btn btn-primary" type="button">OK</button>
     </div>
   </div>
 
@@ -118,31 +127,32 @@
 
     // Emoji celebration burst
     function burstEmojis(){
-      const card = document.querySelector('.modal-card');
-      if (!card) return;
-      const rect = card.getBoundingClientRect();
       const container = document.createElement('div');
       container.className = 'emoji-burst';
-      const emojis = ['🎉','✨','🥳','🏆','♟️','⭐'];
-      const count = 18;
+      const emojis = ['🎉','✨','🥳','🏆','♟️','⭐','💫','🔥','🎊'];
+      const area = window.innerWidth * window.innerHeight;
+      const count = Math.min(160, Math.max(60, Math.floor(area / 12000)));
       for (let i = 0; i < count; i++) {
         const s = document.createElement('span');
         s.className = 'emoji';
         s.textContent = emojis[i % emojis.length];
-        const startX = rect.left + rect.width / 2 + (Math.random() * 100 - 50);
-        const startY = rect.top + 40 + (Math.random() * 40 - 20);
-        const dx = (Math.random() * 320 - 160);
-        const dy = (Math.random() * 80);
+        const startX = Math.random() * window.innerWidth;
+        const startY = Math.random() * window.innerHeight;
+        const dx = (Math.random() * 600 - 300);
+        const dy = (Math.random() * 600 - 300);
+        const rot = (Math.random() * 240 - 120) + 'deg';
         s.style.left = startX + 'px';
         s.style.top = startY + 'px';
-        s.style.setProperty('--x', dx + 'px');
-        s.style.setProperty('--y', dy + 'px');
-        s.style.animationDelay = (Math.random() * 0.1) + 's';
-        s.style.fontSize = (24 + Math.random() * 10) + 'px';
+        s.style.setProperty('--dx', dx + 'px');
+        s.style.setProperty('--dy', dy + 'px');
+        s.style.setProperty('--rot', rot);
+        s.style.animationDelay = (Math.random() * 0.25) + 's';
+        s.style.animationDuration = (1000 + Math.random() * 900) + 'ms';
+        s.style.fontSize = (36 + Math.random() * 44) + 'px';
         container.appendChild(s);
       }
       document.body.appendChild(container);
-      setTimeout(() => container.remove(), 1200);
+      setTimeout(() => container.remove(), 2400);
     }
 
     const form = document.querySelector('form');
@@ -159,16 +169,19 @@
       }
     });
     const modal = document.getElementById('successModal');
+    const duplicateModal = document.getElementById('duplicateModal');
     const successBody = document.getElementById('successBody');
     document.getElementById('closeModal').addEventListener('click', ()=> modal.classList.remove('show'));
     modal.addEventListener('click', (e)=>{ if (e.target === modal) modal.classList.remove('show'); });
+    document.getElementById('closeDup').addEventListener('click', ()=> duplicateModal.classList.remove('show'));
+    duplicateModal.addEventListener('click', (e)=>{ if (e.target === duplicateModal) duplicateModal.classList.remove('show'); });
     // Normalize Student ID and enforce format
     const sid = document.getElementById('studentId');
-    const sidRe = /^DR[- ]?\d{3}$/;
+    const sidRe = /^[A-Z]{2}[- ]?\d{3}$/;
     sid.addEventListener('input', () => {
-      let v = sid.value.toUpperCase().trim().replace(/\s+/g, ' ');
+      let v = sid.value.toUpperCase().replace(/[^A-Z0-9\- ]/g, '').slice(0,6);
       sid.value = v;
-      sid.setCustomValidity(sidRe.test(v) ? '' : 'Use DR-123, DR 123 or DR123');
+      sid.setCustomValidity(sidRe.test(v) ? '' : "Use two letters then optional '-' or space, then three digits. e.g., AD-205 or DR205");
     });
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -185,6 +198,7 @@
           sid.reportValidity();
           throw new Error('Invalid Student ID format');
         }
+        const normalizedSid = currentSid.replace(/[- ]/g, '');
         // Duplicate Student ID guard
         const dupRes = await fetch(`https://firestore.googleapis.com/v1/projects/chess-26c82/databases/(default)/documents:runQuery`, {
           method: 'POST',
@@ -192,7 +206,7 @@
           body: JSON.stringify({
             structuredQuery: {
               from: [{ collectionId: 'registrations' }],
-              where: { fieldFilter: { field: { fieldPath: 'studentId' }, op: 'EQUAL', value: { stringValue: currentSid } } },
+              where: { fieldFilter: { field: { fieldPath: 'studentId' }, op: 'EQUAL', value: { stringValue: normalizedSid } } },
               limit: 1
             }
           })
@@ -200,13 +214,13 @@
         const dupJson = await dupRes.json();
         const already = Array.isArray(dupJson) && dupJson.length && dupJson[0].document;
         if (already) {
-          alert('A form with this Student ID has already been submitted.');
+          duplicateModal.classList.add('show');
           return;
         }
         const payload = {
           username: form.username.value.trim(),
           course: form.course.value,
-          studentId: currentSid,
+          studentId: normalizedSid,
           year: form.year.value,
           ip,
           createdAt: serverTimestamp()
@@ -219,7 +233,7 @@
         successBody.textContent = `Thanks ${payload.username}. Your name is registered.`;
         document.getElementById('successId').textContent = `ID: ${shortId}`;
         modal.classList.add('show');
-        // Celebration: sound + emojis
+        // Celebration: sound + bigger emoji burst
         playSuccessSound();
         burstEmojis();
         form.reset();

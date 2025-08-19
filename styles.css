@@ -90,7 +90,17 @@ body {
 .pawn-hero {
   display: none; /* minimal landing, hide hero */
 }
-
+.chess-logo{
+  display: grid;
+  place-items: center;
+  width: 100%;
+  margin: 0 0 6px;
+}
+.chess-logo img{
+  width: clamp(120px, 12vw + 80px, 200px);
+  height: auto;
+  opacity: 0.95;
+}
 /* Buttons */
 .btn {
   display: inline-flex;
@@ -161,7 +171,7 @@ body {
   color: var(--muted);
   text-align: center;
   background: var(--bg);
-  border-top: 1px solid var(--line);
+  /* border-top: 1px solid var(--line); */
 }
 
 @media (min-width: 960px) {
@@ -258,10 +268,17 @@ td { color: var(--text); }
 /* Modal */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
 .modal.show { display: flex; }
-.modal-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 28px; width: min(600px, 94%); text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
-.modal-title { font-family: 'Poppins', system-ui, sans-serif; font-weight: 800; color: #fff; margin-bottom: 12px; font-size: 30px; }
+.modal-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 28px; width: min(600px, 94%); text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.6); animation: popIn .22s ease-out; }
+.modal-card.success { border-color: color-mix(in srgb, var(--primary) 50%, var(--line)); box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent) inset; }
+.modal-card.warning { border-color: #e79a3d; box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 0 3px rgba(231,154,61,0.16) inset; }
+.modal-title { font-family: 'Poppins', system-ui, sans-serif; font-weight: 800; color: #fff; margin-bottom: 12px; font-size: 30px; letter-spacing: .2px; }
 .modal-text { color: var(--text); margin: 10px 0 16px; font-size: 17px; }
 .id-badge { display: inline-block; margin: 6px 0 14px; padding: 10px 16px; border-radius: 12px; border: 1px dashed var(--primary-dark); background: rgba(123,191,68,0.1); color: #fff; font-weight: 800; font-size: 24px; letter-spacing: 1px; }
+
+@keyframes popIn {
+  0% { transform: scale(.92); opacity: 0; filter: blur(2px); }
+  100% { transform: scale(1); opacity: 1; filter: blur(0); }
+}
 
 /* Filters and stats */
 .filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
