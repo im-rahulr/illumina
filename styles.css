@@ -85,6 +85,8 @@ body.with-banner { padding-top: var(--banner-h); }
   line-height: 1.2;
   font-weight: 500; /* avoid bold */
   flex-wrap: wrap;
+  box-sizing: border-box;
+  word-wrap: anywhere;
 }
 #siteBanner.site-banner a:link,
 #siteBanner.site-banner a:visited { color: #fff !important; font-weight: 500; text-decoration: underline; }
@@ -104,6 +106,8 @@ body.with-banner { padding-top: var(--banner-h); }
 
 @media (max-width: 480px) {
   .site-banner { font-size: 13px; }
+  #siteBanner.site-banner { padding: 6px 36px 6px 12px; }
+  .banner-close { right: 6px; font-size: 20px; }
 }
 
 /* Main container */
@@ -119,6 +123,11 @@ body.with-banner { padding-top: var(--banner-h); }
   justify-content: center;
   min-height: calc(100vh - var(--footer-h));
   gap: 10px;
+}
+
+/* When banner is present, reduce the container min-height to keep viewport-fit on mobile */
+body.with-banner .container {
+  min-height: calc(100vh - var(--footer-h) - var(--banner-h));
 }
 
 .title {
