@@ -8,8 +8,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y0TXQST3MG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);} 
+    gtag('js', new Date());
+    gtag('config', 'G-Y0TXQST3MG');
+  </script>
 </head>
 <body>
+  <div id="siteBanner" class="site-banner" role="region" aria-label="Announcement" style="display:none">
+    <span><strong>New trial is out</strong> — follow updates at</span>
+    <a href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">@lac_cultural_department</a>
+    <button id="closeBanner" class="banner-close" aria-label="Close announcement">×</button>
+  </div>
   <main class="container" role="main">
     <h1 class="title">Admin</h1>
 
@@ -31,8 +44,9 @@
 
     <section id="admin-panel" style="display:none; width:100%;">
       <div class="toolbar">
-        <div class="meta">Registrations</div>
-        <div>
+        <div class="meta">Registrations <span class="live"><span id="liveDot" class="live-dot"></span>Live</span></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input id="searchBox" class="input search" placeholder="Search name, ID, IP..." />
           <button id="exportCsv" class="btn btn-dark">Export CSV</button>
         </div>
       </div>
@@ -58,6 +72,7 @@
         <div class="chart-card"><canvas id="byYear"></canvas></div>
       </div>
       <div class="table-wrap">
+        <div id="tableLoading" class="loading-overlay"><div class="spinner-standalone"></div></div>
         <table>
           <thead>
             <tr>
@@ -72,19 +87,38 @@
           </thead>
           <tbody id="rows"></tbody>
         </table>
+        <div id="emptyState" class="empty-state" style="display:none;">No results match your filter.</div>
       </div>
     </section>
   </main>
 
-  <footer class="footer" role="contentinfo">
+  <!-- <footer class="footer" role="contentinfo">
     <small>Designed by CodeCraft • <a class="login-link" href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">Instagram</a></small>
-  </footer>
+  </footer> -->
 
   <script type="module">
     import { db } from './firebase-config.js';
     import { collection, getDocs, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
     // db is imported from firebase-config.js
+
+    // Announcement banner logic
+    try {
+      const dismissed = localStorage.getItem('bannerDismissed') === '1';
+      const banner = document.getElementById('siteBanner');
+      if (!dismissed && banner) {
+        banner.style.display = 'flex';
+        document.body.classList.add('with-banner');
+        const h = banner.getBoundingClientRect().height;
+        document.documentElement.style.setProperty('--banner-h', h + 'px');
+        const btn = document.getElementById('closeBanner');
+        if (btn) btn.addEventListener('click', () => {
+          banner.style.display = 'none';
+          document.body.classList.remove('with-banner');
+          localStorage.setItem('bannerDismissed','1');
+        });
+      }
+    } catch {}
 
     const loginForm = document.getElementById('admin-login');
     const panel = document.getElementById('admin-panel');
@@ -131,6 +165,7 @@
     async function initDataFeed(){
       const tbody = document.getElementById('rows');
       tbody.innerHTML = '';
+      document.getElementById('tableLoading').classList.add('show');
       let qRef;
       try {
         qRef = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
@@ -142,9 +177,13 @@
         const rows = [];
         snap.forEach(doc => rows.push({ id: doc.id, ...doc.data() }));
         renderWithFilters(rows);
+        document.getElementById('tableLoading').classList.remove('show');
+        document.getElementById('liveDot').classList.add('on');
       }, (err) => {
         alert('Failed to read data. Check Firestore rules and that the database is enabled.');
         console.error(err);
+        document.getElementById('tableLoading').classList.remove('show');
+        document.getElementById('liveDot').classList.remove('on');
       });
     }
 
@@ -152,7 +191,14 @@
       const tbody = document.getElementById('rows');
       const fc = document.getElementById('filterCourse').value;
       const fy = document.getElementById('filterYear').value;
-      const filtered = all.filter(r => (fc ? r.course === fc : true) && (fy ? String(r.year) === fy : true));
+      const q = document.getElementById('searchBox').value.trim().toLowerCase();
+      const filtered = all.filter(r => (fc ? r.course === fc : true) && (fy ? String(r.year) === fy : true) && (
+        q ? (
+          String(r.username||'').toLowerCase().includes(q) ||
+          String(r.studentId||'').toLowerCase().includes(q) ||
+          String(r.ip||'').toLowerCase().includes(q)
+        ) : true
+      ));
       document.getElementById('totalBadge').textContent = `Total: ${filtered.length}`;
       tbody.innerHTML = '';
       let idx = 1;
@@ -171,6 +217,7 @@
       renderCharts(byCourse, byYear);
       // Save last dataset for re-render on filter change
       window.__lastAllRows = all;
+      document.getElementById('emptyState').style.display = filtered.length ? 'none' : '';
     }
 
     document.getElementById('filterCourse').addEventListener('change', () => {
@@ -179,22 +226,28 @@
     document.getElementById('filterYear').addEventListener('change', () => {
       if (window.__lastAllRows) renderWithFilters(window.__lastAllRows);
     });
+    document.getElementById('searchBox').addEventListener('input', () => {
+      if (window.__lastAllRows) renderWithFilters(window.__lastAllRows);
+    });
 
     let __courseChart = null, __yearChart = null;
     async function renderCharts(byCourse, byYear){
       const { Chart } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm');
       const cc = document.getElementById('byCourse');
       const cy = document.getElementById('byYear');
-      const border = '#7bbf44';
+      // Color palettes
+      const courseColorMap = { BBA: '#4dabf7', BCA: '#845ef7', BCOM: '#ffa94d', Other: '#adb5bd' };
+      const courseLabels = Object.keys(byCourse);
+      const courseColors = courseLabels.map(l => courseColorMap[l] || '#74c0fc');
       const courseConfig = {
         type: 'bar',
         data: {
-          labels: Object.keys(byCourse),
+          labels: courseLabels,
           datasets: [{
             label: 'By Course',
             data: Object.values(byCourse),
-            backgroundColor: 'rgba(123,191,68,0.4)',
-            borderColor: border,
+            backgroundColor: courseColors,
+            borderColor: courseColors,
             borderWidth: 1
           }]
         },
@@ -209,14 +262,18 @@
       if (__courseChart) __courseChart.destroy();
       __courseChart = new Chart(cc, courseConfig);
 
+      const yearLabels = Object.keys(byYear);
+      const yearColorMap = { '1': '#4dabf7', '2': '#ffa94d', '3': '#e64980', Other: '#495057' };
+      const yearColors = yearLabels.map(l => yearColorMap[l] || '#74c0fc');
+
       const yearConfig = {
         type: 'doughnut',
         data: {
-          labels: Object.keys(byYear),
+          labels: yearLabels,
           datasets: [{
             label: 'By Year',
             data: Object.values(byYear),
-            backgroundColor: ['#7bbf44','#6aac37','#82c24d','#444']
+            backgroundColor: yearColors
           }]
         },
         options: { plugins: { legend: { labels: { color: '#fff' } } } }

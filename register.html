@@ -17,10 +17,23 @@
       100% { transform: translate(var(--dx, 0px), var(--dy, -160px)) scale(1.6) rotate(var(--rot, 25deg)); opacity: 0; }
     }
   </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y0TXQST3MG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);} 
+    gtag('js', new Date());
+    gtag('config', 'G-Y0TXQST3MG');
+  </script>
   
   <meta name="description" content="Register your chess account.">
 </head>
 <body>
+  <div id="siteBanner" class="site-banner" role="region" aria-label="Announcement" style="display:none">
+    <span><strong>New trial is out</strong> — follow updates at</span>
+    <a href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">@lac_cultural_department</a>
+    <button id="closeBanner" class="banner-close" aria-label="Close announcement">×</button>
+  </div>
   
 
   <main class="container" role="main">
@@ -45,7 +58,7 @@
         </div>
         <div class="form-group">
           <label for="studentId">Student ID</label>
-          <input id="studentId" name="studentId" class="input" type="text" placeholder="e.g., AD-205 or DR205" required pattern="[A-Za-z]{2}[- ]?[0-9]{3}" title="Two letters then optional '-' or space, then three digits. Examples: AD-205 or DR205" maxlength="6" autocomplete="off" inputmode="text">
+          <input id="studentId" name="studentId" class="input" type="text" placeholder="e.g., DA-205 or DR205" required pattern="[A-Za-z]{2}[- ]?[0-9]{3}" title="Two letters then optional '-' or space, then three digits. Examples: AD-205 or DR205" maxlength="6" autocomplete="off" inputmode="text">
         </div>
         <div class="form-group">
           <label for="year">Year</label>
@@ -56,7 +69,10 @@
             <option value="3">3</option>
           </select>
         </div>
-        <button class="btn btn-primary btn-block" type="submit">Submit</button>
+        <button class="btn btn-primary btn-block" type="submit" aria-busy="false">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="btn-label">Submit</span>
+        </button>
         <div class="helper">We only collect the above info for registration. No passwords needed.</div>
       </div>
     </form>
@@ -155,6 +171,25 @@
       setTimeout(() => container.remove(), 2400);
     }
 
+    // Announcement banner logic
+    try {
+      const dismissed = localStorage.getItem('bannerDismissed') === '1';
+      const banner = document.getElementById('siteBanner');
+      if (!dismissed && banner) {
+        banner.style.display = 'flex';
+        document.body.classList.add('with-banner');
+        // set dynamic banner height variable
+        const h = banner.getBoundingClientRect().height;
+        document.documentElement.style.setProperty('--banner-h', h + 'px');
+        const btn = document.getElementById('closeBanner');
+        if (btn) btn.addEventListener('click', () => {
+          banner.style.display = 'none';
+          document.body.classList.remove('with-banner');
+          localStorage.setItem('bannerDismissed','1');
+        });
+      }
+    } catch {}
+
     const form = document.querySelector('form');
     const liveWelcome = document.getElementById('liveWelcome');
     const liveName = document.getElementById('liveName');
@@ -187,8 +222,17 @@
       e.preventDefault();
       if (!form.reportValidity()) return;
       const submitBtn = form.querySelector('button[type="submit"]');
+      const btnLabel = submitBtn.querySelector('.btn-label');
+      const previousLabel = btnLabel ? btnLabel.textContent : 'Submit';
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Submitting…';
+      submitBtn.classList.add('is-loading');
+      submitBtn.setAttribute('aria-busy','true');
+      if (btnLabel) btnLabel.textContent = 'Submitting…';
+      // rocket animation element
+      const rocket = document.createElement('div');
+      rocket.className = 'rocket';
+      rocket.textContent = '🚀';
+      document.body.appendChild(rocket);
       try {
         const ipRes = await fetch('https://api.ipify.org?format=json');
         const { ip } = await ipRes.json();
@@ -226,7 +270,7 @@
           createdAt: serverTimestamp()
         };
         const docRef = await addDoc(collection(db, 'registrations'), payload);
-        submitBtn.textContent = 'Submitted';
+        if (btnLabel) btnLabel.textContent = 'Submitted';
         // Make a short 3-digit code from the Firestore doc id
         const hash = Array.from(docRef.id).reduce((a,c)=> (a*33 + c.charCodeAt(0)) % 1000, 0);
         const shortId = String(hash).padStart(3,'0');
@@ -242,7 +286,13 @@
         alert('Failed to submit. Please try again.');
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit';
+        submitBtn.classList.remove('is-loading');
+        submitBtn.removeAttribute('aria-busy');
+        if (btnLabel) btnLabel.textContent = previousLabel;
+        setTimeout(() => {
+          const r = document.querySelector('.rocket');
+          if (r) r.remove();
+        }, 2000);
       }
     });
   </script>

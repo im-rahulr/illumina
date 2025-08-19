@@ -8,10 +8,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y0TXQST3MG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);} 
+    gtag('js', new Date());
+    gtag('config', 'G-Y0TXQST3MG');
+  </script>
   
   <meta name="description" content="Create your chess account. Sign up or continue with Google or Apple.">
 </head>
 <body>
+  <div id="siteBanner" class="site-banner" role="region" aria-label="Announcement" style="display:none">
+    <span><strong>New trial is out</strong> — follow updates at</span>
+    <a href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">@lac_cultural_department</a>
+    <button id="closeBanner" class="banner-close" aria-label="Close announcement">×</button>
+  </div>
   
   <main class="container" role="main">
     <div class="chess-logo">
@@ -36,6 +49,24 @@
 
   <script>
     (function(){
+      // Announcement banner logic
+      try {
+        var dismissed = localStorage.getItem('bannerDismissed') === '1';
+        var banner = document.getElementById('siteBanner');
+        if (!dismissed && banner) {
+          banner.style.display = 'flex';
+          document.body.classList.add('with-banner');
+          var h = banner.getBoundingClientRect().height;
+          document.documentElement.style.setProperty('--banner-h', h + 'px');
+          var btn = document.getElementById('closeBanner');
+          if (btn) btn.addEventListener('click', function(){
+            banner.style.display = 'none';
+            document.body.classList.remove('with-banner');
+            localStorage.setItem('bannerDismissed','1');
+          });
+        }
+      } catch (e) {}
+
       var target = new Date('2025-08-28T00:00:00');
       function update(){
         var now = new Date();
