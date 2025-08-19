@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin – Lowry Mastermind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container" role="main">
+    <h1 class="title">Admin</h1>
+
+    <form id="admin-login" class="form-card" style="max-width:480px;">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="adminUser">Username</label>
+          <input id="adminUser" class="input" type="text" placeholder="admin" required>
+        </div>
+        <div class="form-group">
+          <label for="adminPass">Password</label>
+          <div class="input-row">
+            <input id="adminPass" class="input" type="password" placeholder="Password" required>
+            <button id="togglePass" class="btn-icon" type="button" aria-label="Show password">👁️</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Login</button>      </div>
+    </form>
+
+    <section id="admin-panel" style="display:none; width:100%;">
+      <div class="toolbar">
+        <div class="meta">Registrations</div>
+        <div>
+          <button id="exportCsv" class="btn btn-dark">Export CSV</button>
+        </div>
+      </div>
+      <div class="filters">
+        <span id="totalBadge" class="stat-badge">Total: 0</span>
+        <label class="helper">Course</label>
+        <select id="filterCourse" class="input">
+          <option value="">All</option>
+          <option>BBA</option>
+          <option>BCA</option>
+          <option>BCOM</option>
+        </select>
+        <label class="helper">Year</label>
+        <select id="filterYear" class="input">
+          <option value="">All</option>
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+        </select>
+      </div>
+      <div class="charts">
+        <div class="chart-card"><canvas id="byCourse"></canvas></div>
+        <div class="chart-card"><canvas id="byYear"></canvas></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Username</th>
+              <th>Course</th>
+              <th>Student ID</th>
+              <th>Year</th>
+              <th>IP</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <small>Designed by CodeCraft • <a class="login-link" href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">Instagram</a></small>
+  </footer>
+
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { collection, getDocs, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    // db is imported from firebase-config.js
+
+    const loginForm = document.getElementById('admin-login');
+    const panel = document.getElementById('admin-panel');
+    const toggleBtn = document.getElementById('togglePass');
+    toggleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('adminPass');
+      const isPwd = input.type === 'password';
+      input.type = isPwd ? 'text' : 'password';
+      toggleBtn.setAttribute('aria-label', isPwd ? 'Hide password' : 'Show password');
+    });
+    // Auto-fill if remembered
+    const remembered = localStorage.getItem('adminRemember') === '1';
+    if (remembered) {
+      document.getElementById('adminUser').value = 'admin';
+      document.getElementById('adminPass').value = 'lowry@123';
+    }
+
+    // Add remember me toggle
+    const rememberToggle = document.createElement('label');
+    rememberToggle.className = 'helper';
+    rememberToggle.style.display = 'inline-flex';
+    rememberToggle.style.alignItems = 'center';
+    rememberToggle.style.gap = '6px';
+    rememberToggle.innerHTML = `<input id="rememberMe" type="checkbox" ${remembered ? 'checked' : ''}> Remember me`;
+    loginForm.querySelector('.form-grid').appendChild(rememberToggle);
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const u = document.getElementById('adminUser').value.trim();
+      const p = document.getElementById('adminPass').value;
+      // Allow quick login even if form auto-capitalizes
+      if (u.toLowerCase() === 'admin' && p === 'lowry@123') {
+        localStorage.setItem('adminRemember', document.getElementById('rememberMe').checked ? '1' : '0');
+        loginForm.style.display = 'none';
+        panel.style.display = '';
+        await initDataFeed();
+      } else {
+        alert('Invalid credentials');
+      }
+    });
+
+    let unsubscribe = null;
+    async function initDataFeed(){
+      const tbody = document.getElementById('rows');
+      tbody.innerHTML = '';
+      let qRef;
+      try {
+        qRef = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
+      } catch (e) {
+        qRef = collection(db, 'registrations');
+      }
+      if (unsubscribe) unsubscribe();
+      unsubscribe = onSnapshot(qRef, (snap) => {
+        const rows = [];
+        snap.forEach(doc => rows.push({ id: doc.id, ...doc.data() }));
+        renderWithFilters(rows);
+      }, (err) => {
+        alert('Failed to read data. Check Firestore rules and that the database is enabled.');
+        console.error(err);
+      });
+    }
+
+    function renderWithFilters(all){
+      const tbody = document.getElementById('rows');
+      const fc = document.getElementById('filterCourse').value;
+      const fy = document.getElementById('filterYear').value;
+      const filtered = all.filter(r => (fc ? r.course === fc : true) && (fy ? String(r.year) === fy : true));
+      document.getElementById('totalBadge').textContent = `Total: ${filtered.length}`;
+      tbody.innerHTML = '';
+      let idx = 1;
+      const byCourse = { BBA:0, BCA:0, BCOM:0, Other:0 };
+      const byYear = { '1':0, '2':0, '3':0, Other:0 };
+      filtered.forEach(d => {
+        const tr = document.createElement('tr');
+        const created = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString() : '';
+        tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username||'')}</td><td>${escapeHtml(d.course||'')}</td><td>${escapeHtml(d.studentId||'')}</td><td>${escapeHtml(d.year||'')}</td><td>${escapeHtml(d.ip||'')}</td><td>${created}</td>`;
+        tbody.appendChild(tr);
+        const cKey = ['BBA','BCA','BCOM'].includes(d.course) ? d.course : 'Other';
+        byCourse[cKey]++;
+        const yKey = ['1','2','3'].includes(String(d.year)) ? String(d.year) : 'Other';
+        byYear[yKey]++;
+      });
+      renderCharts(byCourse, byYear);
+      // Save last dataset for re-render on filter change
+      window.__lastAllRows = all;
+    }
+
+    document.getElementById('filterCourse').addEventListener('change', () => {
+      if (window.__lastAllRows) renderWithFilters(window.__lastAllRows);
+    });
+    document.getElementById('filterYear').addEventListener('change', () => {
+      if (window.__lastAllRows) renderWithFilters(window.__lastAllRows);
+    });
+
+    let __courseChart = null, __yearChart = null;
+    async function renderCharts(byCourse, byYear){
+      const { Chart } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm');
+      const cc = document.getElementById('byCourse');
+      const cy = document.getElementById('byYear');
+      const border = '#7bbf44';
+      const courseConfig = {
+        type: 'bar',
+        data: {
+          labels: Object.keys(byCourse),
+          datasets: [{
+            label: 'By Course',
+            data: Object.values(byCourse),
+            backgroundColor: 'rgba(123,191,68,0.4)',
+            borderColor: border,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          plugins: { legend: { labels: { color: '#fff' } } },
+          scales: {
+            x: { ticks: { color: '#B3B3B3' }, grid: { color: '#31302F' } },
+            y: { ticks: { color: '#B3B3B3' }, grid: { color: '#31302F' }, beginAtZero: true }
+          }
+        }
+      };
+      if (__courseChart) __courseChart.destroy();
+      __courseChart = new Chart(cc, courseConfig);
+
+      const yearConfig = {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(byYear),
+          datasets: [{
+            label: 'By Year',
+            data: Object.values(byYear),
+            backgroundColor: ['#7bbf44','#6aac37','#82c24d','#444']
+          }]
+        },
+        options: { plugins: { legend: { labels: { color: '#fff' } } } }
+      };
+      if (__yearChart) __yearChart.destroy();
+      __yearChart = new Chart(cy, yearConfig);
+    }
+
+    document.getElementById('exportCsv').addEventListener('click', async () => {
+      const q = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
+      const snap = await getDocs(q);
+      const rows = [['#','username','course','studentId','year','ip','createdAt']];
+      let i = 1;
+      snap.forEach(doc => {
+        const d = doc.data();
+        const created = d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : '';
+        rows.push([i++, d.username||'', d.course||'', d.studentId||'', d.year||'', d.ip||'', created]);
+      });
+      const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"','""') + '"').join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'registrations.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    function escapeHtml(s){
+      return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+  </script>
+</body>
+</html>
+
+

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register – Chess</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .emoji-burst { position: fixed; inset: 0; pointer-events: none; overflow: visible; }
+    .emoji { position: absolute; will-change: transform, opacity; animation: floatUp 900ms ease-out forwards; }
+    @keyframes floatUp {
+      0% { transform: translate(var(--x, 0px), var(--y, 0px)) scale(0.8) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      100% { transform: translate(var(--x, 0px), calc(var(--y, 0px) - 120px)) scale(1.15) rotate(20deg); opacity: 0; }
+    }
+  </style>
+  
+  <meta name="description" content="Register your chess account.">
+</head>
+<body>
+  
+
+  <main class="container" role="main">
+    <h1 class="title">Register</h1>
+    <div id="liveWelcome" class="stat-badge" style="display:none">Welcome, <span id="liveName"></span> — ready to register</div>
+    
+
+    <form class="form-card" action="#" method="post" novalidate>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="username">User name</label>
+          <input id="username" name="username" class="input" type="text" placeholder="Your username" required minlength="2">
+        </div>
+        <div class="form-group">
+          <label for="course">Course</label>
+          <select id="course" name="course" class="input" required>
+            <option value="" disabled selected>Select course</option>
+            <option value="BBA">BBA</option>
+            <option value="BCA">BCA</option>
+            <option value="BCOM">BCOM</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="studentId">Student ID</label>
+          <input id="studentId" name="studentId" class="input" type="text" placeholder="e.g., DR-205" required pattern="DR[- ]?[0-9]{3}" title="Format: DR-123, DR 123 or DR123">
+        </div>
+        <div class="form-group">
+          <label for="year">Year</label>
+          <select id="year" name="year" class="input" required>
+            <option value="" disabled selected>Select year</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Submit</button>
+        <div class="helper">We only collect the above info for registration. No passwords needed.</div>
+      </div>
+    </form>
+
+    <small>Need help? Connect with us on <a class="login-link" href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">Instagram</a></small>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <small>Designed by CodeCraft • <a class="login-link" href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">Instagram</a></small>
+  </footer>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+    <div class="modal-card">
+      <div id="successTitle" class="modal-title">Thank you!</div>
+      <div class="modal-text" id="successBody"></div>
+      <div id="successId" class="id-badge"></div>
+      <button id="closeModal" class="btn btn-primary" type="button">Close</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    // Audio: prepare lightweight success chime without any permission prompts
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    function ensureAudio(){
+      if (!AudioCtx) return;
+      if (!audioCtx) audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    // Unlock audio on first user interaction so later playback works seamlessly
+    window.addEventListener('pointerdown', ensureAudio, { once: true });
+    window.addEventListener('keydown', ensureAudio, { once: true });
+    function playSuccessSound(){
+      try {
+        ensureAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+        notes.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          const t = now + i * 0.08;
+          gain.gain.setValueAtTime(0, t);
+          gain.gain.linearRampToValueAtTime(0.15, t + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+          osc.start(t);
+          osc.stop(t + 0.27);
+        });
+      } catch {}
+    }
+
+    // Emoji celebration burst
+    function burstEmojis(){
+      const card = document.querySelector('.modal-card');
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      const container = document.createElement('div');
+      container.className = 'emoji-burst';
+      const emojis = ['🎉','✨','🥳','🏆','♟️','⭐'];
+      const count = 18;
+      for (let i = 0; i < count; i++) {
+        const s = document.createElement('span');
+        s.className = 'emoji';
+        s.textContent = emojis[i % emojis.length];
+        const startX = rect.left + rect.width / 2 + (Math.random() * 100 - 50);
+        const startY = rect.top + 40 + (Math.random() * 40 - 20);
+        const dx = (Math.random() * 320 - 160);
+        const dy = (Math.random() * 80);
+        s.style.left = startX + 'px';
+        s.style.top = startY + 'px';
+        s.style.setProperty('--x', dx + 'px');
+        s.style.setProperty('--y', dy + 'px');
+        s.style.animationDelay = (Math.random() * 0.1) + 's';
+        s.style.fontSize = (24 + Math.random() * 10) + 'px';
+        container.appendChild(s);
+      }
+      document.body.appendChild(container);
+      setTimeout(() => container.remove(), 1200);
+    }
+
+    const form = document.querySelector('form');
+    const liveWelcome = document.getElementById('liveWelcome');
+    const liveName = document.getElementById('liveName');
+    const nameInput = document.getElementById('username');
+    nameInput.addEventListener('input', () => {
+      const v = nameInput.value.trim();
+      if (v.length > 0) {
+        liveName.textContent = v;
+        liveWelcome.style.display = '';
+      } else {
+        liveWelcome.style.display = 'none';
+      }
+    });
+    const modal = document.getElementById('successModal');
+    const successBody = document.getElementById('successBody');
+    document.getElementById('closeModal').addEventListener('click', ()=> modal.classList.remove('show'));
+    modal.addEventListener('click', (e)=>{ if (e.target === modal) modal.classList.remove('show'); });
+    // Normalize Student ID and enforce format
+    const sid = document.getElementById('studentId');
+    const sidRe = /^DR[- ]?\d{3}$/;
+    sid.addEventListener('input', () => {
+      let v = sid.value.toUpperCase().trim().replace(/\s+/g, ' ');
+      sid.value = v;
+      sid.setCustomValidity(sidRe.test(v) ? '' : 'Use DR-123, DR 123 or DR123');
+    });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+      try {
+        const ipRes = await fetch('https://api.ipify.org?format=json');
+        const { ip } = await ipRes.json();
+        // Validate SID one more time
+        const currentSid = sid.value.toUpperCase().trim();
+        if (!sidRe.test(currentSid)) {
+          sid.reportValidity();
+          throw new Error('Invalid Student ID format');
+        }
+        // Duplicate Student ID guard
+        const dupRes = await fetch(`https://firestore.googleapis.com/v1/projects/chess-26c82/databases/(default)/documents:runQuery`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            structuredQuery: {
+              from: [{ collectionId: 'registrations' }],
+              where: { fieldFilter: { field: { fieldPath: 'studentId' }, op: 'EQUAL', value: { stringValue: currentSid } } },
+              limit: 1
+            }
+          })
+        });
+        const dupJson = await dupRes.json();
+        const already = Array.isArray(dupJson) && dupJson.length && dupJson[0].document;
+        if (already) {
+          alert('A form with this Student ID has already been submitted.');
+          return;
+        }
+        const payload = {
+          username: form.username.value.trim(),
+          course: form.course.value,
+          studentId: currentSid,
+          year: form.year.value,
+          ip,
+          createdAt: serverTimestamp()
+        };
+        const docRef = await addDoc(collection(db, 'registrations'), payload);
+        submitBtn.textContent = 'Submitted';
+        // Make a short 3-digit code from the Firestore doc id
+        const hash = Array.from(docRef.id).reduce((a,c)=> (a*33 + c.charCodeAt(0)) % 1000, 0);
+        const shortId = String(hash).padStart(3,'0');
+        successBody.textContent = `Thanks ${payload.username}. Your name is registered.`;
+        document.getElementById('successId').textContent = `ID: ${shortId}`;
+        modal.classList.add('show');
+        // Celebration: sound + emojis
+        playSuccessSound();
+        burstEmojis();
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        alert('Failed to submit. Please try again.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit';
+      }
+    });
+  </script>
+</body>
+</html>
+
+

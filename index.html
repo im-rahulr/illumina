@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lowry Mastermind Chess Competition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  
+  <meta name="description" content="Create your chess account. Sign up or continue with Google or Apple.">
+</head>
+<body>
+  
+
+  <main class="container" role="main">
+    <h1 class="title">Lowry Mastermind</h1>
+    <p class="subtitle">Chess Competition</p>
+
+    <div class="countdown" aria-live="polite">
+      <div class="count-box"><div id="dd" class="count-num">0</div><div class="count-label">Days</div></div>
+      <div class="count-box"><div id="hh" class="count-num">0</div><div class="count-label">Hours</div></div>
+      <div class="count-box"><div id="mm" class="count-num">0</div><div class="count-label">Minutes</div></div>
+      <div class="count-box"><div id="ss" class="count-num">0</div><div class="count-label">Seconds</div></div>
+    </div>
+
+    <p class="meta">Starts on 28 Aug 2025 • Rapid time control • Limited seats</p>
+
+    <a class="btn btn-primary" href="register.html" role="button">Register</a>
+
+    <div class="social-cta">Follow Lowry Cultural Page: <a href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">Instagram</a></div>
+  </main>
+
+  <script>
+    (function(){
+      var target = new Date('2025-08-28T00:00:00');
+      function update(){
+        var now = new Date();
+        var diff = Math.max(0, target - now);
+        var s = Math.floor(diff / 1000);
+        var d = Math.floor(s / 86400); s -= d * 86400;
+        var h = Math.floor(s / 3600); s -= h * 3600;
+        var m = Math.floor(s / 60); s -= m * 60;
+        document.getElementById('dd').textContent = d;
+        document.getElementById('hh').textContent = String(h).padStart(2,'0');
+        document.getElementById('mm').textContent = String(m).padStart(2,'0');
+        document.getElementById('ss').textContent = String(s).padStart(2,'0');
+      }
+      update();
+      setInterval(update, 1000);
+    })();
+  </script>
+
+  <footer class="footer" role="contentinfo">
+    <small>Designed by CodeCraft • <a class="login-link" href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">Instagram</a></small>
+  </footer>
+  
+</body>
+</html>
+
+
