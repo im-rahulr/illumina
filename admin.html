@@ -104,9 +104,8 @@
 
     // Announcement banner logic
     try {
-      const dismissed = localStorage.getItem('bannerDismissed') === '1';
       const banner = document.getElementById('siteBanner');
-      if (!dismissed && banner) {
+      if (banner) {
         banner.style.display = 'flex';
         document.body.classList.add('with-banner');
         const h = banner.getBoundingClientRect().height;
@@ -115,7 +114,6 @@
         if (btn) btn.addEventListener('click', () => {
           banner.style.display = 'none';
           document.body.classList.remove('with-banner');
-          localStorage.setItem('bannerDismissed','1');
         });
       }
     } catch {}
