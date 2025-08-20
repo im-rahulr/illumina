@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="styles.css?v=3">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y0TXQST3MG"></script>
   <script>
@@ -57,6 +57,11 @@
 
   <script>
     (function(){
+      // Error handling for deployment debugging
+      window.addEventListener('error', function(e) {
+        console.error('Global error:', e.error);
+      });
+      
       // Announcement banner logic
       try {
         var banner = document.getElementById('siteBanner');
@@ -71,20 +76,32 @@
             document.body.classList.remove('with-banner');
           });
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Banner error:', e);
+      }
 
       var target = new Date('2025-08-28T00:00:00');
       function update(){
-        var now = new Date();
-        var diff = Math.max(0, target - now);
-        var s = Math.floor(diff / 1000);
-        var d = Math.floor(s / 86400); s -= d * 86400;
-        var h = Math.floor(s / 3600); s -= h * 3600;
-        var m = Math.floor(s / 60); s -= m * 60;
-        document.getElementById('dd').textContent = d;
-        document.getElementById('hh').textContent = String(h).padStart(2,'0');
-        document.getElementById('mm').textContent = String(m).padStart(2,'0');
-        document.getElementById('ss').textContent = String(s).padStart(2,'0');
+        try {
+          var now = new Date();
+          var diff = Math.max(0, target - now);
+          var s = Math.floor(diff / 1000);
+          var d = Math.floor(s / 86400); s -= d * 86400;
+          var h = Math.floor(s / 3600); s -= h * 3600;
+          var m = Math.floor(s / 60); s -= m * 60;
+          
+          var ddEl = document.getElementById('dd');
+          var hhEl = document.getElementById('hh');
+          var mmEl = document.getElementById('mm');
+          var ssEl = document.getElementById('ss');
+          
+          if (ddEl) ddEl.textContent = d;
+          if (hhEl) hhEl.textContent = String(h).padStart(2,'0');
+          if (mmEl) mmEl.textContent = String(m).padStart(2,'0');
+          if (ssEl) ssEl.textContent = String(s).padStart(2,'0');
+        } catch (e) {
+          console.error('Countdown error:', e);
+        }
       }
       update();
       setInterval(update, 1000);
