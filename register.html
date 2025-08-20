@@ -38,7 +38,7 @@
   <meta name="description" content="Register your chess account.">
 </head>
 <body>
-  <div id="siteBanner" class="site-banner" role="region" aria-label="Announcement" style="display:none">
+  <div id="siteBanner" class="site-banner" role="region" aria-label="Announcement">
     <span><strong>New trial is out</strong> — follow updates at</span>
     <a href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">@lac_cultural_department</a>
     <button id="closeBanner" class="banner-close" aria-label="Close announcement">×</button>
@@ -186,17 +186,35 @@
     try {
       const banner = document.getElementById('siteBanner');
       if (banner) {
+        // Ensure banner is visible
         banner.style.display = 'flex';
+        banner.style.visibility = 'visible';
+        banner.style.opacity = '1';
+        
+        // Add banner class to body
         document.body.classList.add('with-banner');
+        
+        // Calculate and set banner height
         const h = banner.getBoundingClientRect().height;
         document.documentElement.style.setProperty('--banner-h', h + 'px');
+        
+        // Add close button functionality
         const btn = document.getElementById('closeBanner');
         if (btn) btn.addEventListener('click', () => {
           banner.style.display = 'none';
           document.body.classList.remove('with-banner');
+          // Reset banner height
+          document.documentElement.style.setProperty('--banner-h', '0px');
         });
+        
+        // Ensure content is pushed down on mobile
+        if (window.innerWidth <= 768) {
+          document.body.style.paddingTop = h + 'px';
+        }
       }
-    } catch {}
+    } catch (error) {
+      console.warn('Banner setup failed:', error);
+    }
 
     const form = document.querySelector('form');
     const liveWelcome = document.getElementById('liveWelcome');

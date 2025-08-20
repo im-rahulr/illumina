@@ -32,7 +32,36 @@ body {
 }
 
 /* When announcement banner is visible, push content down */
-body.with-banner { padding-top: var(--banner-h); }
+body.with-banner { 
+  padding-top: var(--banner-h); 
+}
+
+/* Ensure banner is always visible and properly positioned */
+#siteBanner.site-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: 40px;
+  background: #d0021b !important;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 44px 6px 16px; /* room for close button */
+  z-index: 3000;
+  box-shadow: 0 1px 0 rgba(0,0,0,.35) inset;
+  text-align: center;
+  line-height: 1.2;
+  font-weight: 500; /* avoid bold */
+  flex-wrap: wrap;
+  box-sizing: border-box;
+  word-wrap: anywhere;
+  /* Ensure banner is always visible */
+  visibility: visible !important;
+  opacity: 1 !important;
+}
 
 /* Admin panel note */
 .admin-note {
@@ -227,29 +256,7 @@ body.with-banner { padding-top: var(--banner-h); }
 
 .login-link:hover { text-decoration: underline; }
 
-/* Announcement banner */
-#siteBanner.site-banner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  min-height: 40px;
-  background: #d0021b !important;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 6px 44px 6px 16px; /* room for close button */
-  z-index: 3000;
-  box-shadow: 0 1px 0 rgba(0,0,0,.35) inset;
-  text-align: center;
-  line-height: 1.2;
-  font-weight: 500; /* avoid bold */
-  flex-wrap: wrap;
-  box-sizing: border-box;
-  word-wrap: anywhere;
-}
+/* Announcement banner styles are now defined above */
 #siteBanner.site-banner a:link,
 #siteBanner.site-banner a:visited { color: #fff !important; font-weight: 500; text-decoration: underline; }
 #siteBanner.site-banner strong { font-weight: 500; }
@@ -268,8 +275,20 @@ body.with-banner { padding-top: var(--banner-h); }
 
 @media (max-width: 480px) {
   .site-banner { font-size: 13px; }
-  #siteBanner.site-banner { padding: 6px 36px 6px 12px; }
+  #siteBanner.site-banner { 
+    padding: 6px 36px 6px 12px; 
+    min-height: 44px; /* Ensure minimum height on mobile */
+  }
   .banner-close { right: 6px; font-size: 20px; }
+}
+
+@media (max-width: 360px) {
+  #siteBanner.site-banner { 
+    padding: 8px 32px 8px 10px; 
+    font-size: 12px;
+    min-height: 48px;
+  }
+  .banner-close { right: 4px; font-size: 18px; }
 }
 
 /* Main container */
