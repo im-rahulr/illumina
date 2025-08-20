@@ -18,11 +18,11 @@
   </script>
 </head>
 <body>
-  <div id="siteBanner" class="site-banner" role="region" aria-label="Announcement" style="display:none">
+  <!-- <div id="siteBanner" class="site-banner" role="region" aria-label="Announcement" style="display:none">
     <span><strong>New trial is out</strong> — follow updates at</span>
     <a href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">@lac_cultural_department</a>
     <button id="closeBanner" class="banner-close" aria-label="Close announcement">×</button>
-  </div>
+  </div> -->
   <main class="container admin-container" role="main">
     <h1 class="title">Admin</h1>
 
@@ -44,14 +44,38 @@
 
     <section id="admin-panel" class="admin-panel" style="display:none; width:100%;">
       <div class="toolbar">
-        <div class="meta">Registrations <span class="live"><span id="liveDot" class="live-dot"></span>Live</span></div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta">
+          Registrations 
+          <span class="live"><span id="liveDot" class="live-dot"></span>Live</span>
+          <span id="statusIndicator" class="status-indicator">Connecting...</span>
+        </div>
+        <div class="actions">
           <input id="searchBox" class="input search" placeholder="Search name, Student ID, User ID, IP..." />
           <button id="exportCsv" class="btn btn-dark">Export CSV</button>
+          <button id="debugIds" class="btn btn-secondary">Debug IDs</button>
+          <button id="showErrors" class="btn btn-secondary">Error Log <span id="errorCount" class="badge" aria-label="unread errors">0</span></button>
+          <button id="runTests" class="btn btn-secondary">Run Tests</button>
+          <button id="refreshData" class="btn btn-primary">Refresh</button>
         </div>
       </div>
       <div class="admin-note">
-        <strong>Note:</strong> New registrations will show a User ID (3-digit number). Older registrations may show empty User ID fields.
+        <strong>Note:</strong> New registrations will show a User ID (3-digit number). Older registrations may show empty User ID fields. The User ID is generated uniquely for each registration and should match what was shown to the user during registration.
+      </div>
+      
+      <!-- Error Log Section -->
+      <div id="errorLogSection" class="error-log-section" style="display:none;">
+        <h3>Error Log</h3>
+        <div class="error-tabs">
+          <button id="localErrorsTab" class="error-tab active">Local Errors</button>
+          <button id="dbErrorsTab" class="error-tab">Database Errors</button>
+        </div>
+        <div class="actions" style="margin-bottom: 10px;">
+          <button id="clearErrors" class="btn btn-secondary">Clear Local Errors</button>
+          <button id="exportErrors" class="btn btn-dark">Export Error Log</button>
+          <button id="loadDbErrors" class="btn btn-primary">Load DB Errors</button>
+        </div>
+        <div id="localErrorContent" class="error-log-content"></div>
+        <div id="dbErrorContent" class="error-log-content" style="display:none;"></div>
       </div>
       <div class="filters">
         <span id="totalBadge" class="stat-badge">Total: 0</span>
@@ -71,6 +95,7 @@
         </select>
       </div>
       <div class="charts">
+        <div class="chart-card"><canvas id="byDay"></canvas></div>
         <div class="chart-card"><canvas id="byCourse"></canvas></div>
         <div class="chart-card"><canvas id="byYear"></canvas></div>
         <div class="chart-card"><canvas id="byCoursePct"></canvas></div>
@@ -94,16 +119,27 @@
         </table>
         <div id="emptyState" class="empty-state" style="display:none;">No results match your filter.</div>
       </div>
+      
+      <!-- Diagnostics Modal -->
+      <div id="testModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="testTitle">
+        <div class="modal-card success">
+          <div id="testTitle" class="modal-title">Diagnostics</div>
+          <div id="testSummary" class="modal-text"></div>
+          <div id="testResults" class="error-log-content" style="text-align:left; max-height: 360px;"></div>
+          <button id="testClose" class="btn btn-primary" type="button">Close</button>
+        </div>
+      </div>
     </section>
   </main>
-
+ <br>
+ 
   <!-- <footer class="footer" role="contentinfo">
     <small>Designed by CodeCraft • <a class="login-link" href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">Instagram</a></small>
   </footer> -->
 
   <script type="module">
     import { db } from './firebase-config.js';
-    import { collection, getDocs, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import { collection, getDocs, query, orderBy, onSnapshot, limit } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
     // db is imported from firebase-config.js
 
@@ -161,76 +197,320 @@
         const mainEl = document.querySelector('main.container.admin-container');
         if (mainEl) mainEl.classList.add('is-logged-in');
         await initDataFeed();
+        // Start a light real-time feed for errorLogs so admins see user issues immediately
+        try {
+          const errRef = query(collection(db, 'errorLogs'), orderBy('timestamp', 'desc'));
+          onSnapshot(errRef, (snap) => {
+            const list = [];
+            snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+            errorLog.dbErrors = list;
+            errorLog.updateDisplay();
+            const badge = document.getElementById('errorCount');
+            if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length||0));
+          }, (err) => {
+            errorLog.addError('DB_ERROR_LISTEN', 'Failed to listen to error logs', err);
+          });
+        } catch (err) {
+          errorLog.addError('DB_ERROR_LISTEN', 'Error setting up error log listener', err);
+        }
       } else {
         alert('Invalid credentials');
       }
     });
 
+    // Error logging system
+    const errorLog = {
+      errors: [],
+      dbErrors: [],
+      addError: function(type, message, details = null) {
+        const error = {
+          timestamp: new Date().toISOString(),
+          type: type,
+          message: message,
+          details: details
+        };
+        this.errors.push(error);
+        console.error(`[${type}] ${message}`, details);
+        this.updateDisplay();
+        this.saveToStorage();
+      },
+      updateDisplay: function() {
+        const localContent = document.getElementById('localErrorContent');
+        const dbContent = document.getElementById('dbErrorContent');
+        
+        if (localContent) {
+          localContent.innerHTML = this.errors.map(error => `
+            <div class="error-entry">
+              <div class="error-header">
+                <span class="error-time">${new Date(error.timestamp).toLocaleString()}</span>
+                <span class="error-type">${error.type}</span>
+              </div>
+              <div class="error-message">${error.message}</div>
+              ${error.details ? `<div class="error-details">${JSON.stringify(error.details, null, 2)}</div>` : ''}
+            </div>
+          `).join('');
+        }
+        
+        if (dbContent) {
+          dbContent.innerHTML = this.dbErrors.map(error => `
+            <div class="error-entry">
+              <div class="error-header">
+                <span class="error-time">${error.timestamp?.toDate ? error.timestamp.toDate().toLocaleString() : 'Unknown'}</span>
+                <span class="error-type">${error.type || 'DB_ERROR'}</span>
+              </div>
+              <div class="error-message">${error.message || 'Unknown error'}</div>
+              ${error.details ? `<div class="error-details">${JSON.stringify(error.details, null, 2)}</div>` : ''}
+            </div>
+          `).join('');
+        }
+      },
+      saveToStorage: function() {
+        try {
+          localStorage.setItem('adminErrorLog', JSON.stringify(this.errors.slice(-50))); // Keep last 50 errors
+        } catch (e) {
+          console.warn('Failed to save error log to localStorage');
+        }
+      },
+      loadFromStorage: function() {
+        try {
+          const stored = localStorage.getItem('adminErrorLog');
+          if (stored) {
+            this.errors = JSON.parse(stored);
+            this.updateDisplay();
+          }
+        } catch (e) {
+          console.warn('Failed to load error log from localStorage');
+        }
+      },
+      clear: function() {
+        this.errors = [];
+        this.updateDisplay();
+        this.saveToStorage();
+      },
+      export: function() {
+        const data = JSON.stringify(this.errors, null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `error-log-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      },
+      loadDbErrors: async function() {
+        try {
+          const q = query(collection(db, 'errorLogs'), orderBy('timestamp', 'desc'), limit(100));
+          const snap = await getDocs(q);
+          this.dbErrors = [];
+          snap.forEach(doc => {
+            this.dbErrors.push({ id: doc.id, ...doc.data() });
+          });
+          this.updateDisplay();
+          console.log(`Loaded ${this.dbErrors.length} database errors`);
+        } catch (error) {
+          this.addError('DB_ERROR_LOAD', 'Failed to load database errors', error);
+        }
+      }
+    };
+
+    // Load error log on page load and keep unread count
+    errorLog.loadFromStorage();
+    function updateErrorBadge(){
+      const badge = document.getElementById('errorCount');
+      if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length||0));
+    }
+    const _addErrorRef = errorLog.addError.bind(errorLog);
+    errorLog.addError = function(type, message, details){
+      _addErrorRef(type, message, details);
+      updateErrorBadge();
+    };
+    updateErrorBadge();
+
     let unsubscribe = null;
+    let connectionRetries = 0;
+    const maxRetries = 3;
+    
     async function initDataFeed(){
       const tbody = document.getElementById('rows');
+      const statusIndicator = document.getElementById('statusIndicator');
+      
       tbody.innerHTML = '';
       document.getElementById('tableLoading').classList.add('show');
-      let qRef;
-      try {
-        qRef = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
-      } catch (e) {
-        qRef = collection(db, 'registrations');
+      document.getElementById('liveDot').classList.remove('on');
+      
+      // Update status
+      if (statusIndicator) {
+        statusIndicator.textContent = 'Connecting...';
+        statusIndicator.className = 'status-indicator loading';
       }
-      if (unsubscribe) unsubscribe();
-      unsubscribe = onSnapshot(qRef, (snap) => {
-        const rows = [];
-        snap.forEach(doc => rows.push({ id: doc.id, ...doc.data() }));
-        renderWithFilters(rows);
+      
+      try {
+        // Test database connection first
+        const testQuery = query(collection(db, 'registrations'), limit(1));
+        await getDocs(testQuery);
+        
+        let qRef;
+        try {
+          qRef = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
+        } catch (e) {
+          errorLog.addError('QUERY_ERROR', 'Failed to create ordered query, using basic query', e);
+          qRef = collection(db, 'registrations');
+        }
+        
+        if (unsubscribe) unsubscribe();
+        
+        unsubscribe = onSnapshot(qRef, (snap) => {
+          try {
+            const rows = [];
+            snap.forEach(doc => {
+              try {
+                const data = doc.data();
+                rows.push({ id: doc.id, ...data });
+              } catch (docError) {
+                errorLog.addError('DOC_PARSE_ERROR', `Failed to parse document ${doc.id}`, docError);
+              }
+            });
+            
+            renderWithFilters(rows);
+            document.getElementById('tableLoading').classList.remove('show');
+            document.getElementById('liveDot').classList.add('on');
+            connectionRetries = 0; // Reset retry counter on success
+            
+            // Update status
+            if (statusIndicator) {
+              statusIndicator.textContent = `Connected (${rows.length} records)`;
+              statusIndicator.className = 'status-indicator connected';
+            }
+            
+            // Log successful data load
+            console.log(`Successfully loaded ${rows.length} registrations`);
+            
+          } catch (renderError) {
+            errorLog.addError('RENDER_ERROR', 'Failed to render data', renderError);
+            document.getElementById('tableLoading').classList.remove('show');
+            
+            if (statusIndicator) {
+              statusIndicator.textContent = 'Render Error';
+              statusIndicator.className = 'status-indicator error';
+            }
+          }
+        }, (err) => {
+          connectionRetries++;
+          errorLog.addError('CONNECTION_ERROR', `Database connection failed (attempt ${connectionRetries}/${maxRetries})`, err);
+          
+          document.getElementById('tableLoading').classList.remove('show');
+          document.getElementById('liveDot').classList.remove('on');
+          
+          // Update status
+          if (statusIndicator) {
+            statusIndicator.textContent = `Connection Error (${connectionRetries}/${maxRetries})`;
+            statusIndicator.className = 'status-indicator error';
+          }
+          
+          if (connectionRetries < maxRetries) {
+            // Retry after delay
+            setTimeout(() => {
+              errorLog.addError('RETRY', `Retrying connection... (${connectionRetries}/${maxRetries})`);
+              initDataFeed();
+            }, 2000 * connectionRetries); // Exponential backoff
+          } else {
+            errorLog.addError('FATAL_ERROR', 'Max retries reached. Please check your connection and refresh the page.');
+            alert('Failed to connect to database after multiple attempts. Check the error log for details.');
+          }
+        });
+        
+      } catch (initialError) {
+        errorLog.addError('INIT_ERROR', 'Failed to initialize data feed', initialError);
         document.getElementById('tableLoading').classList.remove('show');
-        document.getElementById('liveDot').classList.add('on');
-      }, (err) => {
-        alert('Failed to read data. Check Firestore rules and that the database is enabled.');
-        console.error(err);
-        document.getElementById('tableLoading').classList.remove('show');
-        document.getElementById('liveDot').classList.remove('on');
-      });
+        
+        if (statusIndicator) {
+          statusIndicator.textContent = 'Init Error';
+          statusIndicator.className = 'status-indicator error';
+        }
+        
+        alert('Failed to initialize database connection. Check the error log for details.');
+      }
     }
 
     function renderWithFilters(all){
-      const tbody = document.getElementById('rows');
-      // Ensure consistent recent-first ordering even if backend ordering fails
-      const ordered = [...all].sort((a, b) => {
-        const aT = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-        const bT = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-        return bT - aT; // recent first
-      });
-      const fc = document.getElementById('filterCourse').value;
-      const fy = document.getElementById('filterYear').value;
-      const q = document.getElementById('searchBox').value.trim().toLowerCase();
-      const filtered = ordered.filter(r => (fc ? r.course === fc : true) && (fy ? String(r.year) === fy : true) && (
-        q ? (
-          String(r.username||'').toLowerCase().includes(q) ||
-          String(r.studentId||'').toLowerCase().includes(q) ||
-          String(r.shortId||'N/A').toLowerCase().includes(q) ||
-          String(r.ip||'').toLowerCase().includes(q)
-        ) : true
-      ));
-      document.getElementById('totalBadge').textContent = `Total: ${filtered.length}`;
-      tbody.innerHTML = '';
-      let idx = 1;
-      const byCourse = { BBA:0, BCA:0, BCOM:0, Other:0 };
-      const byYear = { '1':0, '2':0, '3':0, Other:0 };
-      filtered.forEach(d => {
-        const tr = document.createElement('tr');
-        const created = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString() : '';
-        const shortIdDisplay = d.shortId || 'N/A';
-        tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username||'')}</td><td>${escapeHtml(d.course||'')}</td><td>${escapeHtml(d.studentId||'')}</td><td>${escapeHtml(d.year||'')}</td><td>${escapeHtml(d.ip||'')}</td><td>${escapeHtml(shortIdDisplay)}</td><td>${created}</td>`;
-        tbody.appendChild(tr);
-        const cKey = ['BBA','BCA','BCOM'].includes(d.course) ? d.course : 'Other';
-        byCourse[cKey]++;
-        const yKey = ['1','2','3'].includes(String(d.year)) ? String(d.year) : 'Other';
-        byYear[yKey]++;
-      });
-      renderCharts(byCourse, byYear);
-      // Save last dataset for re-render on filter change
-      window.__lastAllRows = all;
-      document.getElementById('emptyState').style.display = filtered.length ? 'none' : '';
+      try {
+        const tbody = document.getElementById('rows');
+        if (!tbody) {
+          errorLog.addError('RENDER_ERROR', 'Table body element not found');
+          return;
+        }
+        
+        // Ensure consistent recent-first ordering even if backend ordering fails
+        const ordered = [...all].sort((a, b) => {
+          try {
+            const aT = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+            const bT = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+            return bT - aT; // recent first
+          } catch (sortError) {
+            errorLog.addError('SORT_ERROR', 'Failed to sort data by timestamp', sortError);
+            return 0;
+          }
+        });
+        
+        const fc = document.getElementById('filterCourse')?.value || '';
+        const fy = document.getElementById('filterYear')?.value || '';
+        const q = document.getElementById('searchBox')?.value?.trim().toLowerCase() || '';
+        
+        const filtered = ordered.filter(r => {
+          try {
+            return (fc ? r.course === fc : true) && 
+                   (fy ? String(r.year) === fy : true) && 
+                   (q ? (
+                     String(r.username||'').toLowerCase().includes(q) ||
+                     String(r.studentId||'').toLowerCase().includes(q) ||
+                     String(r.shortId||'N/A').toLowerCase().includes(q) ||
+                     String(r.ip||'').toLowerCase().includes(q)
+                   ) : true);
+          } catch (filterError) {
+            errorLog.addError('FILTER_ERROR', `Failed to filter record: ${r.id || 'unknown'}`, filterError);
+            return true; // Include problematic records
+          }
+        });
+        
+        const totalBadge = document.getElementById('totalBadge');
+        if (totalBadge) totalBadge.textContent = `Total: ${filtered.length}`;
+        
+        tbody.innerHTML = '';
+        let idx = 1;
+        const byCourse = { BBA:0, BCA:0, BCOM:0, Other:0 };
+        const byYear = { '1':0, '2':0, '3':0, Other:0 };
+        
+        filtered.forEach(d => {
+          try {
+            const tr = document.createElement('tr');
+            const created = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString() : '';
+            const shortIdDisplay = d.shortId || 'N/A';
+            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username||'')}</td><td>${escapeHtml(d.course||'')}</td><td>${escapeHtml(d.studentId||'')}</td><td>${escapeHtml(d.year||'')}</td><td>${escapeHtml(d.ip||'')}</td><td>${escapeHtml(shortIdDisplay)}</td><td>${created}</td>`;
+            tbody.appendChild(tr);
+            
+            const cKey = ['BBA','BCA','BCOM'].includes(d.course) ? d.course : 'Other';
+            byCourse[cKey]++;
+            const yKey = ['1','2','3'].includes(String(d.year)) ? String(d.year) : 'Other';
+            byYear[yKey]++;
+          } catch (rowError) {
+            errorLog.addError('ROW_ERROR', `Failed to render row for record: ${d.id || 'unknown'}`, rowError);
+          }
+        });
+        
+        try {
+          renderCharts(byCourse, byYear);
+        } catch (chartError) {
+          errorLog.addError('CHART_ERROR', 'Failed to render charts', chartError);
+        }
+        
+        // Save last dataset for re-render on filter change
+        window.__lastAllRows = all;
+        
+        const emptyState = document.getElementById('emptyState');
+        if (emptyState) emptyState.style.display = filtered.length ? 'none' : '';
+        
+      } catch (renderError) {
+        errorLog.addError('RENDER_ERROR', 'Failed to render data table', renderError);
+      }
     }
 
     document.getElementById('filterCourse').addEventListener('change', () => {
@@ -244,8 +524,10 @@
     });
 
     let __courseChart = null, __yearChart = null, __coursePctChart = null;
+    let __byDayChart = null;
     async function renderCharts(byCourse, byYear){
       const { Chart } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm');
+      const bd = document.getElementById('byDay');
       const cc = document.getElementById('byCourse');
       const cy = document.getElementById('byYear');
       const cp = document.getElementById('byCoursePct');
@@ -278,6 +560,39 @@
           }
         }
       };
+      // Recent activity by day (last 14 days) from window.__lastAllRows
+      try {
+        if (bd) {
+          const all = window.__lastAllRows || [];
+          const map = new Map();
+          const now = new Date();
+          for (let i = 13; i >= 0; i--) {
+            const d = new Date(now);
+            d.setDate(now.getDate() - i);
+            const key = d.toISOString().slice(0,10);
+            map.set(key, 0);
+          }
+          all.forEach(r => {
+            const t = r.createdAt?.toDate ? r.createdAt.toDate() : null;
+            if (!t) return;
+            const key = t.toISOString().slice(0,10);
+            if (map.has(key)) map.set(key, map.get(key)+1);
+          });
+          const labels = Array.from(map.keys());
+          const values = Array.from(map.values());
+          const byDayConfig = {
+            type: 'line',
+            data: { labels, datasets: [{ label: 'Registrations (14d)', data: values, borderColor: '#7bbf44', backgroundColor: 'rgba(123,191,68,0.2)', tension: 0.3, fill: true }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom', labels: { color: '#fff' } } }, scales: { x: { ticks: { color: '#B3B3B3' }, grid: { color: '#31302F', drawBorder: false } }, y: { ticks: { color: '#B3B3B3', precision: 0 }, grid: { color: '#31302F', drawBorder: false }, beginAtZero: true } } }
+          };
+          if (__byDayChart) __byDayChart.destroy();
+          bd.parentElement.style.height = '320px';
+          __byDayChart = new Chart(bd, byDayConfig);
+        }
+      } catch (e) {
+        errorLog.addError('CHART_ERROR', 'Failed to render recent activity chart', e);
+      }
+
       if (__courseChart) __courseChart.destroy();
       // Ensure container height for maintainAspectRatio: false
       cc.parentElement.style.height = '320px';
@@ -361,6 +676,155 @@
       a.download = 'registrations.csv';
       a.click();
       URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById('debugIds').addEventListener('click', async () => {
+      try {
+        const q = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+        const issues = [];
+        const shortIdCounts = {};
+        
+        snap.forEach(doc => {
+          const d = doc.data();
+          const shortId = d.shortId || 'N/A';
+          
+          // Count shortId occurrences
+          shortIdCounts[shortId] = (shortIdCounts[shortId] || 0) + 1;
+          
+          // Check for potential issues
+          if (shortId === 'N/A') {
+            issues.push(`Missing shortId for ${d.username} (${d.studentId})`);
+          }
+        });
+        
+        // Find duplicates
+        Object.entries(shortIdCounts).forEach(([id, count]) => {
+          if (count > 1 && id !== 'N/A') {
+            issues.push(`Duplicate shortId ${id} found ${count} times`);
+          }
+        });
+        
+        if (issues.length === 0) {
+          alert('No ID issues found! All registrations have unique shortIds.');
+        } else {
+          alert('ID Issues Found:\n\n' + issues.join('\n'));
+        }
+        
+        console.log('ShortId distribution:', shortIdCounts);
+      } catch (error) {
+        errorLog.addError('DEBUG_ERROR', 'Failed to debug IDs', error);
+        alert('Failed to debug IDs. Check the error log for details.');
+      }
+    });
+
+    // Error log button handlers
+    document.getElementById('showErrors').addEventListener('click', () => {
+      const errorSection = document.getElementById('errorLogSection');
+      if (errorSection) {
+        errorSection.style.display = errorSection.style.display === 'none' ? 'block' : 'none';
+      }
+    });
+
+    document.getElementById('clearErrors').addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear all local errors?')) {
+        errorLog.clear();
+      }
+    });
+
+    document.getElementById('exportErrors').addEventListener('click', () => {
+      errorLog.export();
+    });
+
+    document.getElementById('loadDbErrors').addEventListener('click', async () => {
+      await errorLog.loadDbErrors();
+      const badge = document.getElementById('errorCount');
+      if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length||0));
+    });
+
+    // Error tab switching
+    document.getElementById('localErrorsTab').addEventListener('click', () => {
+      document.getElementById('localErrorsTab').classList.add('active');
+      document.getElementById('dbErrorsTab').classList.remove('active');
+      document.getElementById('localErrorContent').style.display = 'block';
+      document.getElementById('dbErrorContent').style.display = 'none';
+    });
+
+    document.getElementById('dbErrorsTab').addEventListener('click', () => {
+      document.getElementById('dbErrorsTab').classList.add('active');
+      document.getElementById('localErrorsTab').classList.remove('active');
+      document.getElementById('dbErrorContent').style.display = 'block';
+      document.getElementById('localErrorContent').style.display = 'none';
+    });
+
+    // Refresh data button
+    document.getElementById('refreshData').addEventListener('click', async () => {
+      try {
+        errorLog.addError('REFRESH', 'Manual refresh initiated');
+        connectionRetries = 0; // Reset retry counter
+        await initDataFeed();
+      } catch (error) {
+        errorLog.addError('REFRESH_ERROR', 'Failed to refresh data', error);
+        alert('Failed to refresh data. Check the error log for details.');
+      }
+    });
+
+    // Diagnostics runner
+    const testModal = document.getElementById('testModal');
+    const testSummary = document.getElementById('testSummary');
+    const testResults = document.getElementById('testResults');
+    document.getElementById('testClose').addEventListener('click', ()=> testModal.classList.remove('show'));
+    testModal.addEventListener('click', (e)=>{ if (e.target === testModal) testModal.classList.remove('show'); });
+    document.getElementById('runTests').addEventListener('click', async () => {
+      const tasks = [];
+      const add = (name, fn) => tasks.push({ name, fn });
+      const log = [];
+      const pass = (name, detail='OK') => log.push({ name, status: 'PASS', detail });
+      const fail = (name, error) => log.push({ name, status: 'FAIL', detail: (error && (error.message||String(error))) || 'Unknown error' });
+
+      // Prepare tests (read-only and lightweight writes)
+      add('Network online', async () => {
+        if (navigator.onLine) pass('Network online'); else throw new Error('Offline');
+      });
+      add('Firestore read (registrations, 1 doc)', async () => {
+        const q1 = query(collection(db, 'registrations'), limit(1));
+        const s1 = await getDocs(q1);
+        pass('Firestore read (registrations, 1 doc)', `Docs: ${s1.size}`);
+      });
+      add('Firestore listener (registrations)', async () => {
+        await new Promise((resolve, reject) => {
+          const unsub = onSnapshot(query(collection(db, 'registrations'), limit(1)), () => {
+            try { unsub(); pass('Firestore listener (registrations)'); resolve(); } catch (e) { reject(e); }
+          }, (err) => reject(err));
+          setTimeout(()=>{ try { unsub(); } catch(_){}; resolve(); }, 1200); // soft-timeout ok
+        });
+      });
+      add('Error logs read (latest)', async () => {
+        const q2 = query(collection(db, 'errorLogs'), orderBy('timestamp', 'desc'), limit(1));
+        const s2 = await getDocs(q2);
+        pass('Error logs read (latest)', `Docs: ${s2.size}`);
+      });
+      add('Charts render', async () => {
+        try {
+          await renderCharts({ BBA:0, BCA:0, BCOM:0, Other:0 }, { '1':0, '2':0, '3':0, Other:0 });
+          pass('Charts render');
+        } catch (e) { throw e; }
+      });
+
+      // Execute tests
+      for (const t of tasks) {
+        try { await t.fn(); } catch (e) { fail(t.name, e); }
+      }
+      const failed = log.filter(x => x.status === 'FAIL').length;
+      const summary = `${log.length - failed}/${log.length} checks passed`;
+      testSummary.textContent = summary;
+      testResults.innerHTML = log.map(e => `
+        <div class="error-entry">
+          <div class="error-header"><span class="error-type" style="background:${e.status==='PASS'?'#2f9e44':'#d0021b'}">${e.status}</span> <span class="error-time">${e.name}</span></div>
+          <div class="error-message">${e.detail}</div>
+        </div>
+      `).join('');
+      testModal.classList.add('show');
     });
 
     function escapeHtml(s){
