@@ -23,7 +23,7 @@
     <a href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">@lac_cultural_department</a>
     <button id="closeBanner" class="banner-close" aria-label="Close announcement">×</button>
   </div>
-  <main class="container" role="main">
+  <main class="container admin-container" role="main">
     <h1 class="title">Admin</h1>
 
     <form id="admin-login" class="form-card" style="max-width:480px;">
@@ -42,13 +42,16 @@
         <button class="btn btn-primary" type="submit">Login</button>      </div>
     </form>
 
-    <section id="admin-panel" style="display:none; width:100%;">
+    <section id="admin-panel" class="admin-panel" style="display:none; width:100%;">
       <div class="toolbar">
         <div class="meta">Registrations <span class="live"><span id="liveDot" class="live-dot"></span>Live</span></div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <input id="searchBox" class="input search" placeholder="Search name, ID, IP..." />
+          <input id="searchBox" class="input search" placeholder="Search name, Student ID, User ID, IP..." />
           <button id="exportCsv" class="btn btn-dark">Export CSV</button>
         </div>
+      </div>
+      <div class="admin-note">
+        <strong>Note:</strong> New registrations will show a User ID (3-digit number). Older registrations may show empty User ID fields.
       </div>
       <div class="filters">
         <span id="totalBadge" class="stat-badge">Total: 0</span>
@@ -70,6 +73,7 @@
       <div class="charts">
         <div class="chart-card"><canvas id="byCourse"></canvas></div>
         <div class="chart-card"><canvas id="byYear"></canvas></div>
+        <div class="chart-card"><canvas id="byCoursePct"></canvas></div>
       </div>
       <div class="table-wrap">
         <div id="tableLoading" class="loading-overlay"><div class="spinner-standalone"></div></div>
@@ -82,6 +86,7 @@
               <th>Student ID</th>
               <th>Year</th>
               <th>IP</th>
+              <th>User ID</th>
               <th>Created</th>
             </tr>
           </thead>
@@ -153,6 +158,8 @@
         localStorage.setItem('adminRemember', document.getElementById('rememberMe').checked ? '1' : '0');
         loginForm.style.display = 'none';
         panel.style.display = '';
+        const mainEl = document.querySelector('main.container.admin-container');
+        if (mainEl) mainEl.classList.add('is-logged-in');
         await initDataFeed();
       } else {
         alert('Invalid credentials');
@@ -187,13 +194,20 @@
 
     function renderWithFilters(all){
       const tbody = document.getElementById('rows');
+      // Ensure consistent recent-first ordering even if backend ordering fails
+      const ordered = [...all].sort((a, b) => {
+        const aT = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const bT = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return bT - aT; // recent first
+      });
       const fc = document.getElementById('filterCourse').value;
       const fy = document.getElementById('filterYear').value;
       const q = document.getElementById('searchBox').value.trim().toLowerCase();
-      const filtered = all.filter(r => (fc ? r.course === fc : true) && (fy ? String(r.year) === fy : true) && (
+      const filtered = ordered.filter(r => (fc ? r.course === fc : true) && (fy ? String(r.year) === fy : true) && (
         q ? (
           String(r.username||'').toLowerCase().includes(q) ||
           String(r.studentId||'').toLowerCase().includes(q) ||
+          String(r.shortId||'N/A').toLowerCase().includes(q) ||
           String(r.ip||'').toLowerCase().includes(q)
         ) : true
       ));
@@ -205,7 +219,8 @@
       filtered.forEach(d => {
         const tr = document.createElement('tr');
         const created = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString() : '';
-        tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username||'')}</td><td>${escapeHtml(d.course||'')}</td><td>${escapeHtml(d.studentId||'')}</td><td>${escapeHtml(d.year||'')}</td><td>${escapeHtml(d.ip||'')}</td><td>${created}</td>`;
+        const shortIdDisplay = d.shortId || 'N/A';
+        tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username||'')}</td><td>${escapeHtml(d.course||'')}</td><td>${escapeHtml(d.studentId||'')}</td><td>${escapeHtml(d.year||'')}</td><td>${escapeHtml(d.ip||'')}</td><td>${escapeHtml(shortIdDisplay)}</td><td>${created}</td>`;
         tbody.appendChild(tr);
         const cKey = ['BBA','BCA','BCOM'].includes(d.course) ? d.course : 'Other';
         byCourse[cKey]++;
@@ -228,11 +243,12 @@
       if (window.__lastAllRows) renderWithFilters(window.__lastAllRows);
     });
 
-    let __courseChart = null, __yearChart = null;
+    let __courseChart = null, __yearChart = null, __coursePctChart = null;
     async function renderCharts(byCourse, byYear){
       const { Chart } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm');
       const cc = document.getElementById('byCourse');
       const cy = document.getElementById('byYear');
+      const cp = document.getElementById('byCoursePct');
       // Color palettes
       const courseColorMap = { BBA: '#4dabf7', BCA: '#845ef7', BCOM: '#ffa94d', Other: '#adb5bd' };
       const courseLabels = Object.keys(byCourse);
@@ -250,14 +266,21 @@
           }]
         },
         options: {
-          plugins: { legend: { labels: { color: '#fff' } } },
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true, position: 'bottom', labels: { color: '#fff' } },
+            tooltip: { intersect: false, mode: 'index' }
+          },
           scales: {
-            x: { ticks: { color: '#B3B3B3' }, grid: { color: '#31302F' } },
-            y: { ticks: { color: '#B3B3B3' }, grid: { color: '#31302F' }, beginAtZero: true }
+            x: { ticks: { color: '#B3B3B3' }, grid: { color: '#31302F', drawBorder: false } },
+            y: { ticks: { color: '#B3B3B3', precision: 0 }, grid: { color: '#31302F', drawBorder: false }, beginAtZero: true }
           }
         }
       };
       if (__courseChart) __courseChart.destroy();
+      // Ensure container height for maintainAspectRatio: false
+      cc.parentElement.style.height = '320px';
       __courseChart = new Chart(cc, courseConfig);
 
       const yearLabels = Object.keys(byYear);
@@ -271,24 +294,65 @@
           datasets: [{
             label: 'By Year',
             data: Object.values(byYear),
-            backgroundColor: yearColors
+            backgroundColor: yearColors,
+            borderColor: '#1f1f1f',
+            borderWidth: 2
           }]
         },
-        options: { plugins: { legend: { labels: { color: '#fff' } } } }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '58%',
+          plugins: {
+            legend: { display: true, position: 'bottom', labels: { color: '#fff', usePointStyle: true, padding: 14 } }
+          }
+        }
       };
       if (__yearChart) __yearChart.destroy();
+      cy.parentElement.style.height = '320px';
       __yearChart = new Chart(cy, yearConfig);
+
+      // Percentage by course (BBA/BCA/BCOM only)
+      const totalCount = (byCourse.BBA||0) + (byCourse.BCA||0) + (byCourse.BCOM||0);
+      const pctData = totalCount > 0 ? [byCourse.BBA||0, byCourse.BCA||0, byCourse.BCOM||0] : [0,0,0];
+      const pctColors = ['#4dabf7', '#845ef7', '#ffa94d'];
+      const pctConfig = {
+        type: 'pie',
+        data: {
+          labels: ['BBA','BCA','BCOM'],
+          datasets: [{ data: pctData, backgroundColor: pctColors, borderColor: '#1f1f1f', borderWidth: 2 }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true, position: 'bottom', labels: { color: '#fff', usePointStyle: true } },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const value = ctx.parsed || 0;
+                  const pct = totalCount ? ((value / totalCount) * 100).toFixed(1) : '0.0';
+                  return `${ctx.label}: ${value} (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      };
+      if (__coursePctChart) __coursePctChart.destroy();
+      cp.parentElement.style.height = '320px';
+      __coursePctChart = new Chart(cp, pctConfig);
     }
 
     document.getElementById('exportCsv').addEventListener('click', async () => {
       const q = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
       const snap = await getDocs(q);
-      const rows = [['#','username','course','studentId','year','ip','createdAt']];
+      const rows = [['#','username','course','studentId','year','ip','shortId','createdAt']];
       let i = 1;
       snap.forEach(doc => {
         const d = doc.data();
         const created = d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : '';
-        rows.push([i++, d.username||'', d.course||'', d.studentId||'', d.year||'', d.ip||'', created]);
+        rows.push([i++, d.username||'', d.course||'', d.studentId||'', d.year||'', d.ip||'', d.shortId||'N/A', created]);
       });
       const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"','""') + '"').join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });

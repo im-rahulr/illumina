@@ -17,6 +17,7 @@
 
 html, body {
   height: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -26,11 +27,27 @@ body {
   color: var(--text);
   display: grid;
   grid-template-rows: auto 1fr auto;
-  padding-bottom: var(--footer-h); /* prevent overlap with fixed footer */
+  /* add a little extra breathing room under the fixed footer */
+  padding-bottom: calc(var(--footer-h) + 24px + env(safe-area-inset-bottom));
 }
 
 /* When announcement banner is visible, push content down */
 body.with-banner { padding-top: var(--banner-h); }
+
+/* Admin panel note */
+.admin-note {
+  background: rgba(123, 191, 68, 0.1);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+/* Highlight User ID column (cells only). Keep header opaque to avoid overlap/ghosting */
+.admin-panel table td:nth-child(7) { background: rgba(123, 191, 68, 0.05); font-weight: 600; }
+.admin-panel table th:nth-child(7) { background: var(--surface); }
 
 /* Top bar */
 .topbar {
@@ -125,9 +142,32 @@ body.with-banner { padding-top: var(--banner-h); }
   gap: 10px;
 }
 
+@supports (height: 100svh) {
+  .container { min-height: calc(100svh - var(--footer-h)); }
+}
+
+/* Admin container: by default (login screen) stay centered; once logged in, expand */
+.container.admin-container { max-width: 720px; }
+.container.admin-container.is-logged-in {
+  max-width: 1280px;
+  align-items: stretch;
+  text-align: left;
+  justify-content: flex-start;
+  padding-bottom: 80px;
+}
+/* Title alignment based on state */
+.container.admin-container .title { text-align: center; align-self: center; }
+.container.admin-container.is-logged-in .title { text-align: left; align-self: flex-start; }
+/* Center login card */
+.container.admin-container .form-card { margin: 0 auto; }
+
 /* When banner is present, reduce the container min-height to keep viewport-fit on mobile */
 body.with-banner .container {
   min-height: calc(100vh - var(--footer-h) - var(--banner-h));
+}
+
+@supports (height: 100svh) {
+  body.with-banner .container { min-height: calc(100svh - var(--footer-h) - var(--banner-h)); }
 }
 
 .title {
@@ -366,6 +406,14 @@ select.input:hover { background-color: color-mix(in srgb, var(--surface) 85%, #f
 
 /* Admin table */
 .table-wrap { width: min(960px, 100%); margin: 0 auto; overflow-x: auto; }
+/* Allow full-width table in admin view on large screens */
+.admin-container.is-logged-in .table-wrap { width: 100%; margin: 0; }
+/* Ensure table remains readable on mobile by enabling horizontal scroll */
+.admin-panel table { min-width: 760px; }
+/* Improve sticky header look and prevent text overlap */
+.table-wrap thead th { white-space: nowrap; box-shadow: 0 1px 0 rgba(0,0,0,.35) inset; }
+/* Keep sticky headers visible below the announcement banner */
+body.with-banner .table-wrap thead th { top: var(--banner-h); }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; }
 th { color: #fff; font-weight: 700; }
@@ -378,15 +426,26 @@ td { color: var(--text); }
 .btn-icon:hover { filter: brightness(1.1); }
 
 /* Charts */
-.charts { width: min(960px, 100%); margin: 8px auto 16px; display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+.charts { width: min(960px, 100%); margin: 16px auto 24px; display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+/* Expand charts width inside admin container on desktop */
+.admin-container.is-logged-in .charts { width: 100%; margin: 16px 0 24px; grid-template-columns: repeat(3, 1fr); }
+.admin-container.is-logged-in .chart-card { min-height: 360px; }
 .chart-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
 
+@media (max-width: 1200px) {
+  .admin-container.is-logged-in .charts { grid-template-columns: 1fr 1fr; }
+}
 @media (max-width: 720px) {
   .charts { grid-template-columns: 1fr; }
   th, td { padding: 8px 10px; }
   .container { padding: 16px; }
   .title { font-size: 32px; }
   .btn { width: 100%; }
+}
+
+/* Larger screens: ensure comfortable spacing for admin */
+@media (min-width: 1024px) {
+  .container.admin-container.is-logged-in { padding-left: 32px; padding-right: 32px; }
 }
 
 /* Modal */
@@ -410,7 +469,7 @@ td { color: var(--text); }
 .filters .input { width: auto; min-width: 140px; }
 
 /* Charts sizing */
-.chart-card canvas { width: 100% !important; height: 260px !important; }
+.chart-card canvas { width: 100% !important; height: 320px !important; }
 
 
 
@@ -426,7 +485,7 @@ td { color: var(--text); }
 .live-dot.on { background: var(--primary); box-shadow: 0 0 0 6px rgba(123,191,68,0.15); }
 
 .table-wrap { overflow: auto; position: relative; }
-.table-wrap thead th { position: sticky; top: 0; background: var(--surface); z-index: 1; }
+.table-wrap thead th { position: sticky; top: 0; background: var(--surface); z-index: 10; }
 .table-wrap tbody tr:nth-child(odd) { background: rgba(255,255,255,0.02); }
 .table-wrap tbody tr:hover { background: rgba(123,191,68,0.08); }
 

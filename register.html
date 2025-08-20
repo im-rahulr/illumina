@@ -16,6 +16,8 @@
       12% { opacity: 1; }
       100% { transform: translate(var(--dx, 0px), var(--dy, -160px)) scale(1.6) rotate(var(--rot, 25deg)); opacity: 0; }
     }
+    /* simple spinner keyframes kept for button spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y0TXQST3MG"></script>
@@ -58,7 +60,7 @@
         </div>
         <div class="form-group">
           <label for="studentId">Student ID</label>
-          <input id="studentId" name="studentId" class="input" type="text" placeholder="e.g., DA-205 or DR205" required pattern="[A-Za-z]{2}[- ]?[0-9]{3}" title="Two letters then optional '-' or space, then three digits. Examples: AD-205 or DR205" maxlength="6" autocomplete="off" inputmode="text">
+          <input id="studentId" name="studentId" class="input" type="text" placeholder="e.g., DA-205 or DR205" required pattern="[A-Za-z]{2}[- ]?[0-9]{2,3}" title="Two letters then optional '-' or space, then two or three digits. Examples: AD-20 or DR205" maxlength="6" autocomplete="off" inputmode="text">
         </div>
         <div class="form-group">
           <label for="year">Year</label>
@@ -103,9 +105,11 @@
     </div>
   </div>
 
+  
+
   <script type="module">
     import { db } from './firebase-config.js';
-    import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import { collection, doc, setDoc, serverTimestamp, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
     // Audio: prepare lightweight success chime without any permission prompts
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -207,13 +211,24 @@
     modal.addEventListener('click', (e)=>{ if (e.target === modal) modal.classList.remove('show'); });
     document.getElementById('closeDup').addEventListener('click', ()=> duplicateModal.classList.remove('show'));
     duplicateModal.addEventListener('click', (e)=>{ if (e.target === duplicateModal) duplicateModal.classList.remove('show'); });
+
+    async function getIpFast(timeoutMs = 2000){
+      try {
+        const timeout = new Promise((resolve) => setTimeout(() => resolve('unknown'), timeoutMs));
+        const req = fetch('https://api.ipify.org?format=json', { cache: 'no-store' })
+          .then(r => r.ok ? r.json() : Promise.reject())
+          .then(j => (typeof j?.ip === 'string' && j.ip.length <= 45) ? j.ip : 'unknown')
+          .catch(() => 'unknown');
+        return await Promise.race([req, timeout]);
+      } catch { return 'unknown'; }
+    }
     // Normalize Student ID and enforce format
     const sid = document.getElementById('studentId');
-    const sidRe = /^[A-Z]{2}[- ]?\d{3}$/;
+    const sidRe = /^[A-Z]{2}[- ]?\d{2,3}$/;
     sid.addEventListener('input', () => {
       let v = sid.value.toUpperCase().replace(/[^A-Z0-9\- ]/g, '').slice(0,6);
       sid.value = v;
-      sid.setCustomValidity(sidRe.test(v) ? '' : "Use two letters then optional '-' or space, then three digits. e.g., AD-205 or DR205");
+      sid.setCustomValidity(sidRe.test(v) ? '' : "Use two letters then optional '-' or space, then two or three digits. e.g., AD-20 or DR205");
     });
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -225,14 +240,7 @@
       submitBtn.classList.add('is-loading');
       submitBtn.setAttribute('aria-busy','true');
       if (btnLabel) btnLabel.textContent = 'Submitting…';
-      // rocket animation element
-      const rocket = document.createElement('div');
-      rocket.className = 'rocket';
-      rocket.textContent = '🚀';
-      document.body.appendChild(rocket);
       try {
-        const ipRes = await fetch('https://api.ipify.org?format=json');
-        const { ip } = await ipRes.json();
         // Validate SID one more time
         const currentSid = sid.value.toUpperCase().trim();
         if (!sidRe.test(currentSid)) {
@@ -240,37 +248,31 @@
           throw new Error('Invalid Student ID format');
         }
         const normalizedSid = currentSid.replace(/[- ]/g, '');
-        // Duplicate Student ID guard
-        const dupRes = await fetch(`https://firestore.googleapis.com/v1/projects/chess-26c82/databases/(default)/documents:runQuery`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            structuredQuery: {
-              from: [{ collectionId: 'registrations' }],
-              where: { fieldFilter: { field: { fieldPath: 'studentId' }, op: 'EQUAL', value: { stringValue: normalizedSid } } },
-              limit: 1
-            }
-          })
-        });
-        const dupJson = await dupRes.json();
-        const already = Array.isArray(dupJson) && dupJson.length && dupJson[0].document;
-        if (already) {
-          duplicateModal.classList.add('show');
-          return;
-        }
+        // Parallel: duplicate check and IP fetch
+        const dupPromise = (async () => {
+          const qRef = query(collection(db, 'registrations'), where('studentId','==', normalizedSid), limit(1));
+          const snap = await getDocs(qRef);
+          return !snap.empty;
+        })().catch(() => false);
+        const ipPromise = getIpFast();
+        const [already, ipValue] = await Promise.all([dupPromise, ipPromise]);
+        const ip = ipValue || 'unknown';
+        if (already) { duplicateModal.classList.add('show'); return; }
+        // Pre-generate a document ID so we can derive shortId, then write in one step
+        const docRef = doc(collection(db, 'registrations'));
+        const hash = Array.from(docRef.id).reduce((a,c)=> (a*33 + c.charCodeAt(0)) % 1000, 0);
+        const shortId = String(hash).padStart(3,'0');
         const payload = {
           username: form.username.value.trim(),
           course: form.course.value,
           studentId: normalizedSid,
           year: form.year.value,
           ip,
+          shortId,
           createdAt: serverTimestamp()
         };
-        const docRef = await addDoc(collection(db, 'registrations'), payload);
+        await setDoc(docRef, payload);
         if (btnLabel) btnLabel.textContent = 'Submitted';
-        // Make a short 3-digit code from the Firestore doc id
-        const hash = Array.from(docRef.id).reduce((a,c)=> (a*33 + c.charCodeAt(0)) % 1000, 0);
-        const shortId = String(hash).padStart(3,'0');
         successBody.textContent = `Thanks ${payload.username}. Your name is registered.`;
         document.getElementById('successId').textContent = `ID: ${shortId}`;
         modal.classList.add('show');
@@ -286,10 +288,6 @@
         submitBtn.classList.remove('is-loading');
         submitBtn.removeAttribute('aria-busy');
         if (btnLabel) btnLabel.textContent = previousLabel;
-        setTimeout(() => {
-          const r = document.querySelector('.rocket');
-          if (r) r.remove();
-        }, 2000);
       }
     });
   </script>
