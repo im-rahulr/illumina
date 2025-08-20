@@ -537,8 +537,9 @@ select.input:hover { background-color: color-mix(in srgb, var(--surface) 85%, #f
   margin: 12px 0 20px;
   justify-content: center;
   max-width: 100%;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   padding: 0 4px;
+  overflow-x: auto;
 }
 
 .count-box {
@@ -549,6 +550,7 @@ select.input:hover { background-color: color-mix(in srgb, var(--surface) 85%, #f
   min-width: 80px;
   text-align: center;
   flex-shrink: 0;
+  flex: 0 0 auto;
 }
 
 .count-num { font-size: 28px; font-weight: 800; color: #fff; line-height: 1; }
@@ -599,38 +601,38 @@ td { color: var(--text); }
   .title { font-size: 32px; }
   .btn { width: 100%; }
   
-  /* Mobile countdown adjustments */
+  /* Mobile countdown adjustments - larger size */
   .countdown {
-    gap: 8px;
-    padding: 0 4px;
+    gap: 10px;
+    padding: 0 6px;
   }
   
   .count-box {
-    min-width: 70px;
-    padding: 12px 10px;
+    min-width: 85px;
+    padding: 16px 12px;
   }
   
-  .count-num { font-size: 32px; line-height: 1; }
-  .count-label { font-size: 11px; }
+  .count-num { font-size: 38px; line-height: 1; }
+  .count-label { font-size: 12px; }
 }
 
 @media (max-width: 480px) {
   .container { padding: 12px; }
   .title { font-size: 28px; }
   
-  /* Extra small mobile countdown */
+  /* Small mobile countdown - larger size */
   .countdown {
-    gap: 6px;
-    padding: 0 2px;
+    gap: 8px;
+    padding: 0 4px;
   }
   
   .count-box {
-    min-width: 60px;
-    padding: 10px 8px;
+    min-width: 75px;
+    padding: 14px 10px;
   }
   
-  .count-num { font-size: 24px; line-height: 1; }
-  .count-label { font-size: 10px; }
+  .count-num { font-size: 32px; line-height: 1; }
+  .count-label { font-size: 11px; }
   
   .meta { font-size: 14px; }
   .social-cta { font-size: 14px; }
@@ -640,19 +642,19 @@ td { color: var(--text); }
   .container { padding: 8px; }
   .title { font-size: 24px; }
   
-  /* Very small mobile countdown */
+  /* Very small mobile countdown - still larger than before */
   .countdown {
-    gap: 4px;
-    padding: 0 1px;
+    gap: 6px;
+    padding: 0 2px;
   }
   
   .count-box {
-    min-width: 50px;
-    padding: 8px 6px;
+    min-width: 65px;
+    padding: 12px 8px;
   }
   
-  .count-num { font-size: 20px; line-height: 1; }
-  .count-label { font-size: 9px; }
+  .count-num { font-size: 26px; line-height: 1; }
+  .count-label { font-size: 10px; }
   
   .meta { font-size: 13px; }
   .social-cta { font-size: 13px; }
