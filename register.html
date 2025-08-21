@@ -266,46 +266,60 @@
       setTimeout(() => container.remove(), 2400);
     }
 
-    // Announcement banner logic - ensure it's always visible
+    let bannerDismissed = false;
+    // Announcement banner logic - ensure it's always visible and stays hidden after dismiss (runtime only)
     function setupBanner() {
       try {
         const banner = document.getElementById('siteBanner');
-        if (banner) {
-          // Force banner to be visible
-          banner.style.display = 'flex';
-          banner.style.visibility = 'visible';
-          banner.style.opacity = '1';
-          banner.style.position = 'fixed';
-          banner.style.top = '0';
-          banner.style.left = '0';
-          banner.style.right = '0';
-          banner.style.zIndex = '9999';
-          banner.style.background = '#d0021b';
-          banner.style.color = '#fff';
-          
-          // Add banner class to body
-          document.body.classList.add('with-banner');
-          
-          // Calculate and set banner height
-          const h = banner.getBoundingClientRect().height || 44;
-          document.documentElement.style.setProperty('--banner-h', h + 'px');
-          document.body.style.paddingTop = h + 'px';
-          
-          // Add close button functionality
-          const btn = document.getElementById('closeBanner');
-          if (btn) {
-            btn.addEventListener('click', () => {
-              banner.style.display = 'none';
-              document.body.classList.remove('with-banner');
-              document.documentElement.style.setProperty('--banner-h', '0px');
-              document.body.style.paddingTop = '0px';
-            });
-          }
-          
-          console.log('Banner setup complete, height:', h);
-        } else {
+        if (!banner) {
           console.warn('Banner element not found');
+          return;
         }
+
+        const isDismissed = bannerDismissed === true || banner.dataset.closed === '1';
+        if (isDismissed) {
+          banner.style.setProperty('display', 'none', 'important');
+          document.body.classList.remove('with-banner');
+          document.documentElement.style.setProperty('--banner-h', '0px');
+          document.body.style.paddingTop = '0px';
+          return;
+        }
+
+        // Force banner to be visible
+        banner.style.display = 'flex';
+        banner.style.visibility = 'visible';
+        banner.style.opacity = '1';
+        banner.style.position = 'fixed';
+        banner.style.top = '0';
+        banner.style.left = '0';
+        banner.style.right = '0';
+        banner.style.zIndex = '9999';
+        banner.style.background = '#d0021b';
+        banner.style.color = '#fff';
+        
+        // Add banner class to body
+        document.body.classList.add('with-banner');
+        
+        // Calculate and set banner height
+        const h = banner.getBoundingClientRect().height || 44;
+        document.documentElement.style.setProperty('--banner-h', h + 'px');
+        document.body.style.paddingTop = h + 'px';
+        
+        // Add close button functionality (bind once)
+        const btn = document.getElementById('closeBanner');
+        if (btn && !btn.dataset.bound) {
+          btn.dataset.bound = '1';
+          btn.addEventListener('click', () => {
+            bannerDismissed = true;
+            banner.dataset.closed = '1';
+            banner.style.setProperty('display', 'none', 'important');
+            document.body.classList.remove('with-banner');
+            document.documentElement.style.setProperty('--banner-h', '0px');
+            document.body.style.paddingTop = '0px';
+          });
+        }
+        
+        console.log('Banner setup complete, height:', h);
       } catch (error) {
         console.error('Banner setup failed:', error);
       }
