@@ -1,75 +1,42 @@
-# Lowry Mastermind Chess Competition
+# Lowry Mastermind Website
 
-A chess competition registration website with admin dashboard.
+A simple website for announcing and managing the Lowry Mastermind chess event. This document explains how the site works in plain language. No technical setup, code, or passwords are included.
 
-## Files Structure
+## What the site does
+- **Inform** visitors about the event and important dates.
+- **Let students register** using a short form.
+- **Show updates** in a clean Changes Log so everyone can see what’s new.
 
-- `index.html` - Main landing page with countdown timer
-- `register.html` - Registration form
-- `admin.html` - Admin dashboard
-- `styles.css` - Main stylesheet
-- `firebase-config.js` - Firebase configuration
-- `env.js` - Environment variables
-- `netlify.toml` - Netlify deployment configuration
-- `deploy-test.html` - Deployment testing page
+## Main pages
+- `index.html` — Home page with event intro, key actions, and links.
+- `register.html` — Registration form for participants.
+- `changelog.html` — Timeline of updates with version notes. Current release: **1.02.02**.
+- `admin.html` — A simple internal page used by organizers (no credentials are shared here).
 
-## Deployment to Netlify
+## How visitors use the site
+1. **Open the home page** and read about the event.
+2. **Go to Register** and fill out the short form with required details.
+3. **Submit the form** and wait for the confirmation message.
+4. **Check the Changes Log** to see recent improvements and version notes.
 
-### Method 1: Drag & Drop
-1. Zip all files in the `chess website` folder
-2. Go to [Netlify](https://netlify.com)
-3. Drag and drop the zip file to deploy
+## Registration flow
+- The form asks for basic participant information.
+- Input is checked for common mistakes (for example, ID format and empty fields).
+- On success, the site confirms the submission and may show a small celebration effect.
 
-### Method 2: Git Integration
-1. Push your code to GitHub/GitLab
-2. Connect your repository to Netlify
-3. Set build settings:
-   - Build command: (leave empty)
-   - Publish directory: `.`
+## Changes Log (Changelog)
+- Displays a date, tag (Feature, Improvement, Refactor, Fix), short title, and who committed it.
+- Each entry also lists the version, for example: “Committed by: Rahul • Version 1.02.02”.
+- The latest entries appear at the top.
 
-### Method 3: Netlify CLI
-```bash
-npm install -g netlify-cli
-netlify login
-netlify deploy --prod
-```
+## Versioning
+- Versions are written in the format `MAJOR.MINOR.PATCH` (e.g., `1.02.02`).
+- The current public version shown on the site header is **1.02.02**.
 
-## Troubleshooting
+## Support and feedback
+- If you notice an error in your registration or have questions about the event, contact the organizing team through the usual college channels.
+- For website copy edits or new content, reach out to the website maintainers.
 
-### Common Issues
-
-1. **CSS not loading**: Check if `styles.css?v=3` is accessible
-2. **Firebase errors**: Verify Firebase configuration in `env.js`
-3. **Countdown not working**: Check browser console for JavaScript errors
-4. **Admin access**: Username: `admin`, Password: `lowry@123`
-
-### Testing Deployment
-
-Visit `/deploy-test.html` on your deployed site to run diagnostics.
-
-### Cache Issues
-
-If you see old content:
-1. Clear browser cache
-2. Add `?v=4` to CSS links
-3. Check Netlify cache settings
-
-## Features
-
-- ✅ Responsive countdown timer
-- ✅ Registration form with validation
-- ✅ Admin dashboard with real-time data
-- ✅ Firebase integration
-- ✅ Error logging system
-- ✅ Export functionality
-- ✅ Mobile-friendly design
-
-## Admin Access
-
-- **URL**: `/admin.html`
-- **Username**: `admin`
-- **Password**: `lowry@123`
-
-## Support
-
-For issues, check the error log in the admin panel or contact the development team.
+## Notes
+- This README does not include any technical steps, tooling, or passwords.
+- All links on the site point to public pages only.

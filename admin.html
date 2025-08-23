@@ -18,6 +18,10 @@
   </script>
 </head>
 <body>
+  <div id="pageLoader" class="page-loader" aria-live="polite" aria-busy="true">
+    <div class="spinner-standalone" aria-hidden="true"></div>
+    <div id="pageLoaderText" class="loader-text">Loading…</div>
+  </div>
   <!-- <div id="siteBanner" class="site-banner" role="region" aria-label="Announcement" style="display:none">
     <span><strong>New trial is out</strong> — follow updates at</span>
     <a href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">@lac_cultural_department</a>
@@ -50,7 +54,7 @@
           <span id="statusIndicator" class="status-indicator">Connecting...</span>
         </div>
         <div class="actions">
-          <input id="searchBox" class="input search" placeholder="Search name, Student ID, User ID, IP..." />
+          <input id="searchBox" class="input search" placeholder="Search name, Student ID, Token No, IP..." />
           <button id="exportCsv" class="btn btn-dark">Export CSV</button>
           <button id="debugIds" class="btn btn-secondary">Debug IDs</button>
           <button id="showErrors" class="btn btn-secondary">Error Log <span id="errorCount" class="badge" aria-label="unread errors">0</span></button>
@@ -59,7 +63,7 @@
         </div>
       </div>
       <div class="admin-note">
-        <strong>Note:</strong> New registrations will show a User ID (3-digit number). Older registrations may show empty User ID fields. The User ID is generated uniquely for each registration and should match what was shown to the user during registration.
+        <strong>Note:</strong> New registrations will show a Token No (3-digit number). Older registrations may show empty Token No fields. The Token No is generated uniquely for each registration and should match what was shown to the user during registration.
       </div>
       
       <!-- Error Log Section -->
@@ -111,7 +115,7 @@
               <th>Student ID</th>
               <th>Year</th>
               <th>IP</th>
-              <th>User ID</th>
+              <th>Token No</th>
               <th>Created</th>
             </tr>
           </thead>
@@ -185,12 +189,24 @@
     rememberToggle.innerHTML = `<input id="rememberMe" type="checkbox" ${remembered ? 'checked' : ''}> Remember me`;
     loginForm.querySelector('.form-grid').appendChild(rememberToggle);
 
+    // Page loader helpers
+    const pageLoader = document.getElementById('pageLoader');
+    const pageLoaderText = document.getElementById('pageLoaderText');
+    const showPageLoader = (text = 'Loading…') => {
+      if (pageLoader) {
+        if (pageLoaderText) pageLoaderText.textContent = text;
+        pageLoader.classList.add('show');
+      }
+    };
+    const hidePageLoader = () => { if (pageLoader) pageLoader.classList.remove('show'); };
+
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const u = document.getElementById('adminUser').value.trim();
       const p = document.getElementById('adminPass').value;
       // Allow quick login even if form auto-capitalizes
       if (u.toLowerCase() === 'admin' && p === 'lowry@123') {
+        showPageLoader('Signing you in…');
         localStorage.setItem('adminRemember', document.getElementById('rememberMe').checked ? '1' : '0');
         loginForm.style.display = 'none';
         panel.style.display = '';
@@ -213,6 +229,7 @@
         } catch (err) {
           errorLog.addError('DB_ERROR_LISTEN', 'Error setting up error log listener', err);
         }
+        hidePageLoader();
       } else {
         alert('Invalid credentials');
       }
@@ -662,13 +679,14 @@
     document.getElementById('exportCsv').addEventListener('click', async () => {
       const q = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
       const snap = await getDocs(q);
-      const rows = [['#','username','course','studentId','year','ip','shortId','createdAt']];
+      const rows = [['#','username','course','studentId','year','ip','Token No','createdAt']];
       let i = 1;
       snap.forEach(doc => {
         const d = doc.data();
         const created = d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : '';
         rows.push([i++, d.username||'', d.course||'', d.studentId||'', d.year||'', d.ip||'', d.shortId||'N/A', created]);
       });
+
       const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"','""') + '"').join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a');
@@ -684,34 +702,34 @@
         const snap = await getDocs(q);
         const issues = [];
         const shortIdCounts = {};
-        
+
         snap.forEach(doc => {
           const d = doc.data();
           const shortId = d.shortId || 'N/A';
-          
+
           // Count shortId occurrences
           shortIdCounts[shortId] = (shortIdCounts[shortId] || 0) + 1;
-          
+
           // Check for potential issues
           if (shortId === 'N/A') {
-            issues.push(`Missing shortId for ${d.username} (${d.studentId})`);
+            issues.push(`Missing token for ${d.username} (${d.studentId})`);
           }
         });
-        
+
         // Find duplicates
         Object.entries(shortIdCounts).forEach(([id, count]) => {
           if (count > 1 && id !== 'N/A') {
-            issues.push(`Duplicate shortId ${id} found ${count} times`);
+            issues.push(`Duplicate token ${id} found ${count} times`);
           }
         });
-        
+
         if (issues.length === 0) {
-          alert('No ID issues found! All registrations have unique shortIds.');
+          alert('No token issues found! All registrations have unique tokens.');
         } else {
-          alert('ID Issues Found:\n\n' + issues.join('\n'));
+          alert('Token Issues Found:\n\n' + issues.join('\n'));
         }
-        
-        console.log('ShortId distribution:', shortIdCounts);
+
+        console.log('Token distribution:', shortIdCounts);
       } catch (error) {
         errorLog.addError('DEBUG_ERROR', 'Failed to debug IDs', error);
         alert('Failed to debug IDs. Check the error log for details.');

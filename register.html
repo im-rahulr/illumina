@@ -170,7 +170,8 @@
       </div>
     </form>
 
-    <small>Need help? Connect with us on <a class="login-link" href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">Instagram</a></small>
+    <small>Follow Lowry Cultural Page: <a class="login-link" href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">Instagram</a></small>
+    <!-- <div class="social-cta"><a class="login-link" href="changelog.html">View Changelog</a></div> -->
   </main>
 
   <footer class="footer" role="contentinfo">
@@ -493,7 +494,7 @@
         
         if (btnLabel) btnLabel.textContent = 'Submitted';
         successBody.textContent = `Thanks ${payload.username}. Your name is registered.`;
-        document.getElementById('successId').textContent = `ID: ${shortId}`;
+        document.getElementById('successId').textContent = `Token No: ${shortId}`;
         modal.classList.add('show');
         // Celebration: sound + bigger emoji burst
         playSuccessSound();

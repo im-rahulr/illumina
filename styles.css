@@ -174,7 +174,7 @@ body.with-banner {
   overflow-y: auto;
 }
 
-/* Highlight User ID column (cells only). Keep header opaque to avoid overlap/ghosting */
+/* Highlight Token No column (cells only). Keep header opaque to avoid overlap/ghosting */
 .admin-panel table td:nth-child(7) { background: rgba(123, 191, 68, 0.05); font-weight: 600; }
 .admin-panel table th:nth-child(7) { background: var(--surface); }
 
@@ -730,3 +730,9 @@ td { color: var(--text); }
 .empty-state { text-align: center; color: var(--muted); padding: 16px; }
 
 .spinner-standalone { width: 26px; height: 26px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.25); border-top-color: #fff; animation: spin .9s linear infinite; }
+
+/* Page-level loader */
+.page-loader { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.45); z-index: 2000; backdrop-filter: blur(1px); }
+.page-loader.show { display: flex; }
+.page-loader .spinner-standalone { width: 34px; height: 34px; border-width: 4px; }
+.page-loader .loader-text { color: var(--text); font-weight: 700; }
