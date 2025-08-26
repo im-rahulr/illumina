@@ -73,11 +73,20 @@
 
     <p class="meta">Starts on 28 Aug 2025 • Rapid time control • Limited seats</p>
 
-    <a class="btn btn-primary" href="register.html" role="button">Register</a>
+    <a id="registerBtn" class="btn red-btn" href="#" role="button" aria-disabled="true">Registration Closed</a>
 
     <div class="social-cta">Follow Lowry Cultural Page:  <a href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">Instagram</a></div>
     <div class="social-cta"><a class="login-link" href="changelog.html">View Changelog</a></div>
   </main>
+
+  <!-- Registration Closed Modal -->
+  <div id="regClosedModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="regClosedTitle" aria-hidden="true">
+    <div class="modal-card warning">
+      <h2 id="regClosedTitle" class="modal-title">Registration Closed</h2>
+      <p class="modal-text">We're sorry, registrations are currently closed.</p>
+      <button id="closeRegModal" class="btn btn-secondary" type="button">OK</button>
+    </div>
+  </div>
 
   <script>
     (function(){
@@ -129,6 +138,37 @@
       }
       update();
       setInterval(update, 1000);
+      
+      // Registration closed popup
+      try {
+        var regBtn = document.getElementById('registerBtn');
+        var regModal = document.getElementById('regClosedModal');
+        var closeBtn = document.getElementById('closeRegModal');
+        if (regBtn && regModal) {
+          regBtn.addEventListener('click', function(e){
+            e.preventDefault();
+            regModal.classList.add('show');
+            regModal.setAttribute('aria-hidden', 'false');
+          });
+        }
+        function hideRegModal(){
+          if (regModal) {
+            regModal.classList.remove('show');
+            regModal.setAttribute('aria-hidden', 'true');
+          }
+        }
+        if (closeBtn) closeBtn.addEventListener('click', hideRegModal);
+        if (regModal) {
+          regModal.addEventListener('click', function(e){
+            if (e.target === regModal) hideRegModal();
+          });
+        }
+        document.addEventListener('keydown', function(e){
+          if (e.key === 'Escape') hideRegModal();
+        });
+      } catch (e) {
+        console.warn('Registration modal error:', e);
+      }
     })();
   </script>
 
