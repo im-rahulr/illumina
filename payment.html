@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Online Payment – illumina</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=3" />
+  <meta name="description" content="Pay your registration fee online via UPI." />
+</head>
+<body>
+  <main class="container" role="main" style="min-height:100vh; padding: 24px 0; display: flex; align-items: center; justify-content: center;">
+    <div style="max-width: 400px; margin: 0 auto; padding: 0 16px; width: 100%;">
+      <h1 class="title" style="text-align: center; margin-bottom: 4px;">Pay ₹200</h1>
+      <p class="subtitle" style="text-align: center; margin-top: 0;">Scan the QR code to pay using any UPI app</p>
+
+      <section class="form-card" style="background: var(--surface); border:1px solid var(--line); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+        <div style="text-align: center;">
+          <div style="background: #fff; border-radius: 12px; padding: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <img src="images/qrcode.png" alt="Payment QR Code" style="width: 200px; height: 200px; display: block;" />
+          </div>
+          <div class="helper" style="margin: 12px 0 0; font-weight: 500; text-align: center;">
+            <!-- <div>Scan to pay with any UPI app</div> -->
+            <div style="margin-top: 12px; font-size: 15px; font-weight: 600; color: #fff;">Name: MADHAVI</div>
+            <div style="font-size: 14px; color: var(--text-secondary);">Ph.no: 8050816937</div>
+          </div>
+        </div>
+            <div style="display: flex; gap: 16px; align-items: center; justify-content: center; flex-wrap: wrap; margin: 16px 0 8px; padding: 12px 0; width: 100%;">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 60px;">
+                <img src="images/phonepe.png" alt="PhonePe" style="height: 32px; object-fit: contain;">
+                <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">PhonePe</span>
+              </div>
+              <div style="width:1px; height:32px; background: var(--line);"></div>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 60px;">
+                <img src="images/gpay.png" alt="Google Pay" style="height: 32px; object-fit: contain;">
+                <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">Google Pay</span>
+              </div>
+              <div style="width:1px; height:32px; background: var(--line);"></div>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 60px;">
+                <img src="images/upi.png" alt="UPI" style="height: 32px; object-fit: contain;">
+                <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">UPI APPS</span>
+              </div>
+            </div>
+
+        <div style="display:flex; flex-direction:column; gap:16px; margin-top:8px; width: 100%;">
+          <button id="openUpiBtn" class="btn btn-primary" type="button" style="width:100%; padding: 14px; font-size: 16px; font-weight: 600;">PAY NOW</button>
+          <a class="login-link" href="success.html" style="margin: 0 auto;">Cancel</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+
+  <script>
+    // UPI payment configuration
+    const MERCHANT_UPI_ID = '8050816937@ibl';
+    const MERCHANT_NAME = 'MADHAVI';
+    const AMOUNT = '200.00';
+
+    const openUpiBtn = document.getElementById('openUpiBtn');
+
+    function buildUpiLink() {
+      return `upi://pay?cu=INR&pa=${MERCHANT_UPI_ID}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${AMOUNT}`;
+    }
+
+    openUpiBtn.addEventListener('click', () => {
+      const link = buildUpiLink();
+      // Attempt to open the UPI deeplink. This will work on devices with UPI apps installed.
+      window.location.href = link;
+    });
+  </script>
+</body>
+</html>

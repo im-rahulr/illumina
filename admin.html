@@ -90,6 +90,32 @@
         <strong>Note:</strong> New registrations will show a Token No (3-digit number). Older registrations may show empty Token No fields. The Token No is generated uniquely for each registration and should match what was shown to the user during registration.
       </div>
       
+      <button id="showVerificationToggle" class="btn btn-secondary" style="margin-bottom: 20px;">
+        Show Ticket Verification
+      </button>
+
+      <!-- Hidden by default, can be toggled -->
+      <div class="form-card" id="ticketVerificationSection" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="margin:0;">Ticket Verification</h2>
+          <button id="toggleVerificationSection" class="btn-icon" style="font-size:1.2em;" aria-label="Hide verification section">
+            <span>−</span>
+          </button>
+        </div>
+        <div id="verificationContent">
+          <p>Use the QR scanner to verify attendee tickets.</p>
+          <a href="scan.html" class="btn btn-primary" style="margin-top: 12px; display:inline-block;">
+            Open QR Scanner
+          </a>
+          <!-- User Details Display -->
+          <div id="userDetailsCard" style="display: none; margin-top: 16px; padding: 20px; background: var(--bg); border: 2px solid var(--primary); border-radius: 12px;">
+            <h4 style="margin: 0 0 16px; color: var(--primary);">👤 User Details</h4>
+            <div id="userDetailsContent"></div>
+            <button id="closeUserDetails" class="btn btn-secondary" style="margin-top: 16px;">Close</button>
+          </div>
+        </div>
+      </div>
+      
       <!-- Error Log Section -->
       <div id="errorLogSection" class="error-log-section" style="display:none;">
         <h3>Error Log</h3>
@@ -137,6 +163,7 @@
               <th>Username</th>
               <th>Course</th>
               <th>Year</th>
+              <th>Payment</th>
               <th>College</th>
               <th>IP</th>
               <th>Token No</th>
@@ -236,28 +263,69 @@
         panel.style.display = '';
         const mainEl = document.querySelector('main.container.admin-container');
         if (mainEl) mainEl.classList.add('is-logged-in');
-        await initDataFeed();
-        // Start a light real-time feed for errorLogs so admins see user issues immediately
         try {
-          const errRef = query(collection(db, 'errorLogs'), orderBy('timestamp', 'desc'));
-          onSnapshot(errRef, (snap) => {
-            const list = [];
-            snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
-            errorLog.dbErrors = list;
-            errorLog.updateDisplay();
-            const badge = document.getElementById('errorCount');
-            if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length||0));
-          }, (err) => {
-            errorLog.addError('DB_ERROR_LISTEN', 'Failed to listen to error logs', err);
-          });
-        } catch (err) {
-          errorLog.addError('DB_ERROR_LISTEN', 'Error setting up error log listener', err);
+          await initDataFeed();
+          // Start a light real-time feed for errorLogs so admins see user issues immediately
+          try {
+            const errRef = query(collection(db, 'errorLogs'), orderBy('timestamp', 'desc'));
+            onSnapshot(errRef, (snap) => {
+              const list = [];
+              snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+              errorLog.dbErrors = list;
+              errorLog.updateDisplay();
+              const badge = document.getElementById('errorCount');
+              if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length||0));
+            }, (err) => {
+              errorLog.addError('DB_ERROR_LISTEN', 'Failed to listen to error logs', err);
+            });
+          } catch (err) {
+            errorLog.addError('DB_ERROR_LISTEN', 'Error setting up error log listener', err);
+          }
+        } catch (eInit) {
+          // Initialization failed; show message and keep panel visible so user can retry refresh
+          errorLog.addError('INIT_LOGIN_FAIL', 'Failed during initialization after login', eInit);
+          const statusIndicator = document.getElementById('statusIndicator');
+          if (statusIndicator) {
+            statusIndicator.textContent = 'Init Error';
+            statusIndicator.className = 'status-indicator error';
+          }
+          alert('Could not load data. You can click Refresh to retry. See Error Log for details.');
+        } finally {
+          hidePageLoader();
         }
-        hidePageLoader();
       } else {
         alert('Invalid credentials');
       }
     });
+
+    // Toggle ticket verification section
+    const verificationSection = document.getElementById('ticketVerificationSection');
+    const showVerificationToggle = document.getElementById('showVerificationToggle');
+    const toggleVerificationBtn = document.getElementById('toggleVerificationSection');
+    
+    if (showVerificationToggle && verificationSection) {
+      showVerificationToggle.addEventListener('click', () => {
+        verificationSection.style.display = '';
+        showVerificationToggle.style.display = 'none';
+      });
+    }
+    
+    if (toggleVerificationBtn && verificationSection) {
+      toggleVerificationBtn.addEventListener('click', () => {
+        verificationSection.style.display = 'none';
+        if (showVerificationToggle) {
+          showVerificationToggle.style.display = 'inline-block';
+        }
+      });
+    }
+
+    // Close user details card
+    document.getElementById('closeUserDetails')?.addEventListener('click', () => {
+      const card = document.getElementById('userDetailsCard');
+      if (card) card.style.display = 'none';
+    });
+
+    // Manual lookup and QR scanning moved out; related functions removed to prevent runtime errors
 
     // Error logging system
     const errorLog = {
@@ -524,7 +592,7 @@
             const tr = document.createElement('tr');
             const created = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString() : '';
             const shortIdDisplay = d.shortId || 'N/A';
-            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username||'')}</td><td>${escapeHtml(d.course||'')}</td><td>${escapeHtml(d.year||'')}</td><td>${escapeHtml(d.college||'')}</td><td>${escapeHtml(d.ip||'')}</td><td>${escapeHtml(shortIdDisplay)}</td><td>${created}</td>`;
+            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username||'')}</td><td>${escapeHtml(d.course||'')}</td><td>${escapeHtml(d.year||'')}</td><td>${escapeHtml(d.paymentMode||'—')}</td><td>${escapeHtml(d.college||'')}</td><td>${escapeHtml(d.ip||'')}</td><td>${escapeHtml(shortIdDisplay)}</td><td>${created}</td>`;
             tbody.appendChild(tr);
             
             const cKey = ['BBA','BCA','BCOM'].includes(d.course) ? d.course : 'Other';
@@ -702,12 +770,12 @@
     document.getElementById('exportCsv').addEventListener('click', async () => {
       const q = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
       const snap = await getDocs(q);
-      const rows = [['#','username','course','year','college','ip','Token No','createdAt']];
+      const rows = [['#','username','course','year','payment','college','ip','Token No','createdAt']];
       let i = 1;
       snap.forEach(doc => {
         const d = doc.data();
         const created = d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : '';
-        rows.push([i++, d.username||'', d.course||'', d.year||'', d.college||'', d.ip||'', d.shortId||'N/A', created]);
+        rows.push([i++, d.username||'', d.course||'', d.year||'', d.paymentMode||'', d.college||'', d.ip||'', d.shortId||'N/A', created]);
       });
 
       const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"','""') + '"').join(',')).join('\n');

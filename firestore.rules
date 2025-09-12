@@ -20,8 +20,13 @@ service cloud.firestore {
         request.resource.data.ip is string &&
         request.resource.data.keys().hasOnly(['username','course','year','college','phone','ip','shortId','createdAt']);
 
-      /* prevent updates/deletes from the public */
-      allow update, delete: if false;
+      /* allow updating payment fields only */
+      allow update: if
+        request.resource.data.diff(resource.data).changedKeys().hasOnly(['paymentMode','paymentAt']) &&
+        request.resource.data.paymentMode in ['onspot','online'];
+
+      /* prevent deletes from the public */
+      allow delete: if false;
     }
 
     /* Error logs: allow create from clients, reads for admin UI usage */

@@ -3,71 +3,85 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Registration Complete – illumina</title>
+  <title>Final Step – illumina</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=3">
-  <meta name="description" content="Choose how you will participate and view your Token No.">
+  <meta name="description" content="Complete your illumina registration by selecting payment method.">
   <meta property="og:site_name" content="illumina">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Registration Complete • illumina">
-  <meta property="og:description" content="Choose how you will participate and view your Token No.">
+  <meta property="og:title" content="Final Step • illumina">
+  <meta property="og:description" content="Complete your illumina registration by selecting payment method.">
   <meta property="og:url" content="https://lac-chess.netlify.app/success.html">
   <meta property="og:image" content="https://lac-chess.netlify.app/og-image.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Registration Complete • illumina">
-  <meta name="twitter:description" content="Choose how you will participate and view your Token No.">
+  <meta name="twitter:title" content="Final Step • illumina">
+  <meta name="twitter:description" content="Complete your illumina registration by selecting payment method.">
   <meta name="twitter:image" content="https://lac-chess.netlify.app/og-image.jpg">
 </head>
 <body>
-  <main class="container" role="main">
-    <h1 class="title">Thank you!</h1>
-    <p class="subtitle">Choose your mode of payment</p>
+  <main class="container" role="main" style="background: #000; min-height: 100vh; padding: 2rem 0;">
+    <div style="max-width: 560px; margin: 0 auto; padding: 0 1rem;">
+      <h1 class="title">Final Step</h1>
+      <p class="subtitle" id="personalGreeting">Hey [Name]</p>
+      <p style="text-align: center; color: var(--muted); margin-bottom: 1rem;">Choose your payment mode:</p>
 
-    <div class="form-card" style="max-width:560px; margin-inline:auto;">
-      <div class="form-grid">
-        <button id="btnOnSpot" class="btn btn-primary" type="button">On spot</button>
-        <button id="btnOnline" class="btn btn-secondary" type="button">Online</button>
+      <div style="display: grid; gap: 1rem;">
+        <button id="btnOnSpot" class="btn btn-primary" type="button" style="width: 100%; font-weight: 600; padding: 16px; font-size: 16px;">Pay on Spot (recommended)</button>
+        <a id="btnOnline" href="payment.html" class="btn btn-secondary" style="width: 100%; font-weight: 600; text-decoration: none; display: inline-block; text-align: center; padding: 16px; font-size: 16px;">Pay Online Now</a>
 
-        <div id="tokenWrap" class="stat-badge" style="display:none; justify-self:center;">
-          <span id="chosenText"></span>
-          <strong style="margin-left:8px;">Token No: <span id="token"></span></strong>
+        <div id="tokenWrap" class="stat-badge" style="display:none; justify-self:center; text-align: center; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin-top: 16px;">
+          <div id="chosenText" style="font-size: 14px; color: var(--muted); margin-bottom: 8px;"></div>
+          <div style="font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 16px;">
+            Token No: <span id="token"></span>
+          </div>
+          <button id="downloadTicket" class="btn btn-secondary" type="button" style="width: 100%; margin-top: 8px;">
+            📥 Download Ticket
+          </button>
         </div>
 
         <div class="helper" id="helperText"></div>
-        <a class="login-link" href="index.html">Back to Home</a>
       </div>
     </div>
   </main>
 
-  <footer class="footer" role="contentinfo">
-    <small>Designed by <a class="login-link" href="https://codecraft-team.netlify.app/" target="_blank" rel="noopener">CodeCraft</a></small>
-  </footer>
 
   <!-- Success Modal with Token Display -->
   <div id="tokenModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="tokenTitle">
-    <div class="modal-card success">
-      <div id="tokenTitle" class="modal-title">🎉 Registration Complete!</div>
-      <div class="modal-text">Thank you for registering!</div>
-      <div id="tokenDisplay" class="id-badge" style="font-size: 2.5em; margin: 20px 0; padding: 20px; background: #4dabf7; color: white; border-radius: 12px; text-align: center;">
-        <div style="font-size: 0.4em; margin-bottom: 10px;">Your Token Number</div>
-        <div id="modalToken" style="font-weight: bold; letter-spacing: 3px;">---</div>
+    <div class="modal-card success" style="max-width: 500px; width: 90vw;">
+      <div id="tokenTitle" class="modal-title" style="font-size: 28px; margin-bottom: 12px;">🎉 Thank You!</div>
+      <div id="modalUserName" class="modal-text" style="font-size: 18px; font-weight: 500; margin-bottom: 24px; color: var(--muted);">Welcome, [Name]!</div>
+      
+      <div style="background: var(--surface); border: 2px solid var(--primary); border-radius: 12px; padding: 24px; margin: 20px 0; text-align: center;">
+        <div style="font-size: 14px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Token Number</div>
+        <div id="modalToken" style="font-size: 36px; font-weight: 700; color: var(--primary); letter-spacing: 2px;">---</div>
       </div>
-      <div class="modal-text" style="color: #ffa94d; font-weight: 600;">📸 Please take a screenshot of this token for your records!</div>
-      <button id="closeTokenModal" class="btn btn-primary" type="button">Continue</button>
+      
+      <div class="modal-text" style="color: var(--muted); font-size: 14px; margin-bottom: 24px; text-align: center;">Present this token at the venue</div>
+      
+      <button id="downloadTicketModal" class="btn btn-primary" type="button" style="width: 100%; padding: 14px; font-weight: 600;">
+        Download RSVP
+      </button>
     </div>
   </div>
 
   <script type="module">
     import { db } from './firebase-config.js';
-    import { collection, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import { collection, doc, setDoc, serverTimestamp, query, where, limit, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import QRCode from 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm';
 
     (function(){
       const token = sessionStorage.getItem('lastToken');
       const name = sessionStorage.getItem('lastName') || '';
+      
+      // Set personalized greeting
+      const greeting = document.getElementById('personalGreeting');
+      if (name && greeting) {
+        greeting.textContent = `Hey, ${name}!`;
+      }
       const tokenWrap = document.getElementById('tokenWrap');
       const tokenEl = document.getElementById('token');
       const chosenText = document.getElementById('chosenText');
@@ -78,28 +92,154 @@
       const modalToken = document.getElementById('modalToken');
 
       if (!token) {
+        console.error('No token found in sessionStorage');
         helper.textContent = 'Your session has expired or token was not found. Please register again.';
         helper.style.color = '#ff6b6b';
         btnOnSpot.disabled = true;
-        btnOnline.disabled = true;
+        if (btnOnline) btnOnline.style.pointerEvents = 'none';
         return;
       }
+      
+      console.log('Token found:', token);
+      console.log('Name found:', name);
 
-      // Show token modal immediately
+      // Don't show token modal immediately - wait for payment selection
       modalToken.textContent = token;
-      tokenModal.classList.add('show');
 
-      document.getElementById('closeTokenModal').addEventListener('click', () => {
-        tokenModal.classList.remove('show');
+      // Add download functionality to modal button
+      document.getElementById('downloadTicketModal').addEventListener('click', async () => {
+        await generateTicket(token, name, 'onspot');
       });
 
+      // Generate a real QR code canvas using QRCode library
+      async function generateQRCode(text, size = 120) {
+        const canvas = document.createElement('canvas');
+        // Encode meaningful verification payload
+        const payload = JSON.stringify({
+          type: 'illumina_ticket',
+          token: text,
+          name: sessionStorage.getItem('lastName') || '',
+          event: 'illumina',
+          venue: 'Lowry Adventist College, Bangalore',
+          ts: Date.now()
+        });
+        await QRCode.toCanvas(canvas, payload, {
+          width: size,
+          margin: 1,
+          errorCorrectionLevel: 'M',
+          color: { dark: '#000000', light: '#FFFFFF' }
+        });
+        return canvas;
+      }
+
+      // Function to generate and download professional ticket
+      async function generateTicket(tokenNo, userName, mode) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        canvas.width = 800;
+        canvas.height = 600;
+        
+        // Background gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#0b0b0b');
+        gradient.addColorStop(1, '#262524');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Border
+        ctx.strokeStyle = '#7bbf44';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+        
+        // Header section
+        ctx.fillStyle = '#7bbf44';
+        ctx.fillRect(40, 40, canvas.width - 80, 80);
+        
+        // Title
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('illumina', canvas.width / 2, 90);
+        
+        // Subtitle
+        ctx.font = '18px Arial';
+        ctx.fillStyle = '#B3B3B3';
+        ctx.fillText('Lowry Adventist College, Bangalore', canvas.width / 2, 160);
+        
+        // Event details
+        ctx.font = 'bold 24px Arial';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('REGISTRATION TICKET', canvas.width / 2, 220);
+        
+        // Token number (large and prominent)
+        ctx.font = 'bold 48px Arial';
+        ctx.fillStyle = '#7bbf44';
+        ctx.fillText(`TOKEN: ${tokenNo}`, canvas.width / 2, 300);
+        
+        // User details
+        ctx.font = '20px Arial';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(`Name: ${userName}`, canvas.width / 2, 360);
+        
+        // Payment mode
+        ctx.font = '18px Arial';
+        ctx.fillStyle = '#B3B3B3';
+        ctx.fillText(`Payment Mode: ${mode === 'onspot' ? 'Pay on Spot' : 'Online Payment'}`, canvas.width / 2, 400);
+        
+        // Event date
+        ctx.fillText('Event Date: 25 Sep 2025', canvas.width / 2, 430);
+        
+        // Footer
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#7bbf44';
+        ctx.fillText('Please present this ticket at the venue', canvas.width / 2, 480);
+        
+        // Generate and add QR code (scannable)
+        const qrCanvas = await generateQRCode(tokenNo, 140);
+        ctx.drawImage(qrCanvas, canvas.width - 180, canvas.height - 180, 140, 140);
+        
+        // QR code label
+        ctx.font = '12px Arial';
+        ctx.fillStyle = '#B3B3B3';
+        ctx.textAlign = 'center';
+        ctx.fillText('Scan for verification', canvas.width - 100, canvas.height - 25);
+        
+        // Download the image
+        const link = document.createElement('a');
+        link.download = `illumina-ticket-${tokenNo}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      }
+
       async function reveal(mode){
-        chosenText.textContent = mode === 'onspot' ? 'Mode: On spot' : 'Mode: Online';
+        console.log('reveal() called with mode:', mode);
+        console.log('token:', token, 'name:', name);
+        
+        chosenText.textContent = mode === 'onspot' ? 'Mode: Pay on Spot' : 'Mode: Online Payment';
         tokenEl.textContent = token;
         tokenWrap.style.display = '';
 
-        // Save payment/mode selection to Firebase
+        // Show popup only for Pay on Spot
+        if (mode === 'onspot') {
+          // Update modal with user name
+          const modalUserName = document.getElementById('modalUserName');
+          modalUserName.textContent = `Welcome, ${name}!`;
+          
+          // Show the modal
+          tokenModal.classList.add('show');
+        }
+
+        // Add download ticket functionality
+        const downloadBtn = document.getElementById('downloadTicket');
+        downloadBtn.addEventListener('click', async () => {
+          await generateTicket(token, name, mode);
+        });
+
+        // Save payment/mode selection to Firebase and update registration record
         try {
+          console.log('Attempting to save payment mode to Firebase...');
           const paymentRef = doc(collection(db, 'payments'));
           await setDoc(paymentRef, {
             tokenNo: token,
@@ -107,14 +247,41 @@
             mode: mode,
             createdAt: serverTimestamp()
           });
-          console.log('Payment mode saved:', mode);
-        } catch (error) {
-          console.error('Failed to save payment mode:', error);
+          console.log('Payment record saved successfully');
+          
+          // Also update the registration record with payment mode
+          console.log('Looking for registration with shortId:', token);
+          const q = query(collection(db, 'registrations'), where('shortId', '==', token), limit(1));
+          const snap = await getDocs(q);
+          console.log('Query result:', snap.size, 'documents found');
+          
+          if (!snap.empty) {
+            const docRef = snap.docs[0].ref;
+            console.log('Updating registration document with paymentMode:', mode);
+            await updateDoc(docRef, {
+              paymentMode: mode
+            });
+            console.log('Registration updated successfully with paymentMode:', mode);
+          } else {
+            console.error('No registration found with shortId:', token);
+          }
+        } catch (err) {
+          console.error('Failed to save payment mode:', err);
         }
       }
 
-      btnOnSpot.addEventListener('click', () => reveal('onspot'));
-      btnOnline.addEventListener('click', () => reveal('online'));
+      btnOnSpot.addEventListener('click', () => {
+        console.log('Pay on Spot button clicked');
+        reveal('onspot');
+      });
+      if (btnOnline) {
+        btnOnline.addEventListener('click', async (e) => {
+          // Prevent default navigation so we can save the selection first
+          e.preventDefault();
+          await reveal('online');
+          window.location.href = 'payment.html';
+        });
+      }
     })();
   </script>
 </body>

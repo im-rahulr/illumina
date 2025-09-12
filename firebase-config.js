@@ -21,5 +21,3 @@ export const analytics = (() => { try { return getAnalytics(app); } catch (_) { 
 
 // Use long-polling auto-detection to avoid 400 RPC issues behind proxies/ad blockers
 export const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
-
-
