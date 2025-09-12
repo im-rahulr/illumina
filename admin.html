@@ -3,25 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin – Lowry Mastermind</title>
+  <title>Admin – illumina</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=3">
-  <meta name="description" content="Admin panel for Lowry Mastermind registrations.">
+  <meta name="description" content="Admin panel for illumina registrations.">
   <!-- Open Graph / WhatsApp / Facebook -->
-  <meta property="og:site_name" content="Lowry Mastermind">
+  <meta property="og:site_name" content="illumina">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Admin • Lowry Mastermind">
-  <meta property="og:description" content="Admin panel for Lowry Mastermind registrations.">
+  <meta property="og:title" content="Admin • illumina">
+  <meta property="og:description" content="Admin panel for illumina registrations.">
   <meta property="og:url" content="https://lac-chess.netlify.app/admin.html">
   <meta property="og:image" content="https://lac-chess.netlify.app/og-image.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Admin • Lowry Mastermind">
-  <meta name="twitter:description" content="Admin panel for Lowry Mastermind registrations.">
+  <meta name="twitter:title" content="Admin • illumina">
+  <meta name="twitter:description" content="Admin panel for illumina registrations.">
   <meta name="twitter:image" content="https://lac-chess.netlify.app/og-image.jpg">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y0TXQST3MG"></script>
@@ -78,7 +78,7 @@
           <span id="statusIndicator" class="status-indicator">Connecting...</span>
         </div>
         <div class="actions">
-          <input id="searchBox" class="input search" placeholder="Search name, Student ID, Token No, IP..." />
+          <input id="searchBox" class="input search" placeholder="Search name, Token No, IP..." />
           <button id="exportCsv" class="btn btn-dark">Export CSV</button>
           <button id="debugIds" class="btn btn-secondary">Debug IDs</button>
           <button id="showErrors" class="btn btn-secondary">Error Log <span id="errorCount" class="badge" aria-label="unread errors">0</span></button>
@@ -88,6 +88,32 @@
       </div>
       <div class="admin-note">
         <strong>Note:</strong> New registrations will show a Token No (3-digit number). Older registrations may show empty Token No fields. The Token No is generated uniquely for each registration and should match what was shown to the user during registration.
+      </div>
+      
+      <button id="showVerificationToggle" class="btn btn-secondary" style="margin-bottom: 20px;">
+        Show Ticket Verification
+      </button>
+
+      <!-- Hidden by default, can be toggled -->
+      <div class="form-card" id="ticketVerificationSection" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="margin:0;">Ticket Verification</h2>
+          <button id="toggleVerificationSection" class="btn-icon" style="font-size:1.2em;" aria-label="Hide verification section">
+            <span>−</span>
+          </button>
+        </div>
+        <div id="verificationContent">
+          <p>Use the QR scanner to verify attendee tickets.</p>
+          <a href="scan.html" class="btn btn-primary" style="margin-top: 12px; display:inline-block;">
+            Open QR Scanner
+          </a>
+          <!-- User Details Display -->
+          <div id="userDetailsCard" style="display: none; margin-top: 16px; padding: 20px; background: var(--bg); border: 2px solid var(--primary); border-radius: 12px;">
+            <h4 style="margin: 0 0 16px; color: var(--primary);">👤 User Details</h4>
+            <div id="userDetailsContent"></div>
+            <button id="closeUserDetails" class="btn btn-secondary" style="margin-top: 16px;">Close</button>
+          </div>
+        </div>
       </div>
       
       <!-- Error Log Section -->
@@ -136,8 +162,9 @@
               <th>#</th>
               <th>Username</th>
               <th>Course</th>
-              <th>Student ID</th>
               <th>Year</th>
+              <th>Payment</th>
+              <th>College</th>
               <th>IP</th>
               <th>Token No</th>
               <th>Created</th>
@@ -236,28 +263,69 @@
         panel.style.display = '';
         const mainEl = document.querySelector('main.container.admin-container');
         if (mainEl) mainEl.classList.add('is-logged-in');
-        await initDataFeed();
-        // Start a light real-time feed for errorLogs so admins see user issues immediately
         try {
-          const errRef = query(collection(db, 'errorLogs'), orderBy('timestamp', 'desc'));
-          onSnapshot(errRef, (snap) => {
-            const list = [];
-            snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
-            errorLog.dbErrors = list;
-            errorLog.updateDisplay();
-            const badge = document.getElementById('errorCount');
-            if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length||0));
-          }, (err) => {
-            errorLog.addError('DB_ERROR_LISTEN', 'Failed to listen to error logs', err);
-          });
-        } catch (err) {
-          errorLog.addError('DB_ERROR_LISTEN', 'Error setting up error log listener', err);
+          await initDataFeed();
+          // Start a light real-time feed for errorLogs so admins see user issues immediately
+          try {
+            const errRef = query(collection(db, 'errorLogs'), orderBy('timestamp', 'desc'));
+            onSnapshot(errRef, (snap) => {
+              const list = [];
+              snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+              errorLog.dbErrors = list;
+              errorLog.updateDisplay();
+              const badge = document.getElementById('errorCount');
+              if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length||0));
+            }, (err) => {
+              errorLog.addError('DB_ERROR_LISTEN', 'Failed to listen to error logs', err);
+            });
+          } catch (err) {
+            errorLog.addError('DB_ERROR_LISTEN', 'Error setting up error log listener', err);
+          }
+        } catch (eInit) {
+          // Initialization failed; show message and keep panel visible so user can retry refresh
+          errorLog.addError('INIT_LOGIN_FAIL', 'Failed during initialization after login', eInit);
+          const statusIndicator = document.getElementById('statusIndicator');
+          if (statusIndicator) {
+            statusIndicator.textContent = 'Init Error';
+            statusIndicator.className = 'status-indicator error';
+          }
+          alert('Could not load data. You can click Refresh to retry. See Error Log for details.');
+        } finally {
+          hidePageLoader();
         }
-        hidePageLoader();
       } else {
         alert('Invalid credentials');
       }
     });
+
+    // Toggle ticket verification section
+    const verificationSection = document.getElementById('ticketVerificationSection');
+    const showVerificationToggle = document.getElementById('showVerificationToggle');
+    const toggleVerificationBtn = document.getElementById('toggleVerificationSection');
+    
+    if (showVerificationToggle && verificationSection) {
+      showVerificationToggle.addEventListener('click', () => {
+        verificationSection.style.display = '';
+        showVerificationToggle.style.display = 'none';
+      });
+    }
+    
+    if (toggleVerificationBtn && verificationSection) {
+      toggleVerificationBtn.addEventListener('click', () => {
+        verificationSection.style.display = 'none';
+        if (showVerificationToggle) {
+          showVerificationToggle.style.display = 'inline-block';
+        }
+      });
+    }
+
+    // Close user details card
+    document.getElementById('closeUserDetails')?.addEventListener('click', () => {
+      const card = document.getElementById('userDetailsCard');
+      if (card) card.style.display = 'none';
+    });
+
+    // Manual lookup and QR scanning moved out; related functions removed to prevent runtime errors
 
     // Error logging system
     const errorLog = {
@@ -502,7 +570,6 @@
                    (fy ? String(r.year) === fy : true) && 
                    (q ? (
                      String(r.username||'').toLowerCase().includes(q) ||
-                     String(r.studentId||'').toLowerCase().includes(q) ||
                      String(r.shortId||'N/A').toLowerCase().includes(q) ||
                      String(r.ip||'').toLowerCase().includes(q)
                    ) : true);
@@ -525,7 +592,7 @@
             const tr = document.createElement('tr');
             const created = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString() : '';
             const shortIdDisplay = d.shortId || 'N/A';
-            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username||'')}</td><td>${escapeHtml(d.course||'')}</td><td>${escapeHtml(d.studentId||'')}</td><td>${escapeHtml(d.year||'')}</td><td>${escapeHtml(d.ip||'')}</td><td>${escapeHtml(shortIdDisplay)}</td><td>${created}</td>`;
+            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username||'')}</td><td>${escapeHtml(d.course||'')}</td><td>${escapeHtml(d.year||'')}</td><td>${escapeHtml(d.paymentMode||'—')}</td><td>${escapeHtml(d.college||'')}</td><td>${escapeHtml(d.ip||'')}</td><td>${escapeHtml(shortIdDisplay)}</td><td>${created}</td>`;
             tbody.appendChild(tr);
             
             const cKey = ['BBA','BCA','BCOM'].includes(d.course) ? d.course : 'Other';
@@ -703,12 +770,12 @@
     document.getElementById('exportCsv').addEventListener('click', async () => {
       const q = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
       const snap = await getDocs(q);
-      const rows = [['#','username','course','studentId','year','ip','Token No','createdAt']];
+      const rows = [['#','username','course','year','payment','college','ip','Token No','createdAt']];
       let i = 1;
       snap.forEach(doc => {
         const d = doc.data();
         const created = d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : '';
-        rows.push([i++, d.username||'', d.course||'', d.studentId||'', d.year||'', d.ip||'', d.shortId||'N/A', created]);
+        rows.push([i++, d.username||'', d.course||'', d.year||'', d.paymentMode||'', d.college||'', d.ip||'', d.shortId||'N/A', created]);
       });
 
       const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"','""') + '"').join(',')).join('\n');

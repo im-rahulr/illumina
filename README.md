@@ -1,6 +1,6 @@
-# Lowry Mastermind Website
+# illumina Website
 
-A simple website for announcing and managing the Lowry Mastermind chess event. This document explains how the site works in plain language. No technical setup, code, or passwords are included.
+A simple website for announcing and managing illumina at Lowry Adventist College. This document explains how the site works in plain language. No technical setup, code, or passwords are included.
 
 ## What the site does
 - **Inform** visitors about the event and important dates.
@@ -10,7 +10,7 @@ A simple website for announcing and managing the Lowry Mastermind chess event. T
 ## Main pages
 - `index.html` — Home page with event intro, key actions, and links.
 - `register.html` — Registration form for participants.
-- `changelog.html` — Timeline of updates with version notes. Current release: **1.02.02**.
+- `changelog.html` — Timeline of updates with version notes. Current release: **1.02.03**.
 - `admin.html` — A simple internal page used by organizers (no credentials are shared here).
 
 ## How visitors use the site
@@ -21,7 +21,7 @@ A simple website for announcing and managing the Lowry Mastermind chess event. T
 
 ## Registration flow
 - The form asks for basic participant information.
-- Input is checked for common mistakes (for example, ID format and empty fields).
+- Input is checked for common mistakes (for example, empty fields and phone format).
 - On success, the site confirms the submission and may show a small celebration effect.
 
 ## Changes Log (Changelog)

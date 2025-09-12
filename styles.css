@@ -9,7 +9,6 @@
   --primary: #7bbf44;      /* revert to original green */
   --primary-dark: #6aac37;
   --dark: #31302F;         /* supportive dark */
-  --footer-h: 56px;        /* fixed footer height */
   --banner-h: 44px;        /* top banner height (dynamic via JS) */
 }
 
@@ -27,8 +26,7 @@ body {
   color: var(--text);
   display: grid;
   grid-template-rows: auto 1fr auto;
-  /* add a little extra breathing room under the fixed footer */
-  padding-bottom: calc(var(--footer-h) + 24px + env(safe-area-inset-bottom));
+  padding-bottom: 24px;
 }
 
 /* When announcement banner is visible, push content down */
@@ -302,14 +300,18 @@ body.with-banner {
   align-items: center;
   text-align: center;
   justify-content: center;
-  min-height: calc(100vh - var(--footer-h));
+  min-height: 100vh;
   gap: 10px;
   box-sizing: border-box;
   overflow-x: hidden;
 }
 
+body.with-banner .container {
+  min-height: calc(100vh - var(--banner-h));
+}
+
 @supports (height: 100svh) {
-  .container { min-height: calc(100svh - var(--footer-h)); }
+  body.with-banner .container { min-height: calc(100svh - var(--banner-h)); }
 }
 
 /* Admin container: by default (login screen) stay centered; once logged in, expand */
@@ -328,14 +330,6 @@ body.with-banner {
 .container.admin-container .form-card { margin: 0 auto; }
 
 /* When banner is present, reduce the container min-height to keep viewport-fit on mobile */
-body.with-banner .container {
-  min-height: calc(100vh - var(--footer-h) - var(--banner-h));
-}
-
-@supports (height: 100svh) {
-  body.with-banner .container { min-height: calc(100svh - var(--footer-h) - var(--banner-h)); }
-}
-
 .title {
   margin: 12px 0 6px;
   font-size: clamp(28px, 4vw + 12px, 56px);
@@ -496,14 +490,7 @@ select.input:hover { background-color: color-mix(in srgb, var(--surface) 85%, #f
 
 /* Footer */
 .footer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: var(--footer-h);
-  display: grid;
-  place-items: center;
-  padding: 0 24px;
+  display: none;
   color: var(--muted);
   text-align: center;
   background: var(--bg);
