@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registration Complete – illumina</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=3">
+  <meta name="description" content="Choose how you will participate and view your Token No.">
+  <meta property="og:site_name" content="illumina">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Registration Complete • illumina">
+  <meta property="og:description" content="Choose how you will participate and view your Token No.">
+  <meta property="og:url" content="https://lac-chess.netlify.app/success.html">
+  <meta property="og:image" content="https://lac-chess.netlify.app/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Registration Complete • illumina">
+  <meta name="twitter:description" content="Choose how you will participate and view your Token No.">
+  <meta name="twitter:image" content="https://lac-chess.netlify.app/og-image.jpg">
+</head>
+<body>
+  <main class="container" role="main">
+    <h1 class="title">Thank you!</h1>
+    <p class="subtitle">Choose your mode of payment</p>
+
+    <div class="form-card" style="max-width:560px; margin-inline:auto;">
+      <div class="form-grid">
+        <button id="btnOnSpot" class="btn btn-primary" type="button">On spot</button>
+        <button id="btnOnline" class="btn btn-secondary" type="button">Online</button>
+
+        <div id="tokenWrap" class="stat-badge" style="display:none; justify-self:center;">
+          <span id="chosenText"></span>
+          <strong style="margin-left:8px;">Token No: <span id="token"></span></strong>
+        </div>
+
+        <div class="helper" id="helperText"></div>
+        <a class="login-link" href="index.html">Back to Home</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <small>Designed by <a class="login-link" href="https://codecraft-team.netlify.app/" target="_blank" rel="noopener">CodeCraft</a></small>
+  </footer>
+
+  <!-- Success Modal with Token Display -->
+  <div id="tokenModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="tokenTitle">
+    <div class="modal-card success">
+      <div id="tokenTitle" class="modal-title">🎉 Registration Complete!</div>
+      <div class="modal-text">Thank you for registering!</div>
+      <div id="tokenDisplay" class="id-badge" style="font-size: 2.5em; margin: 20px 0; padding: 20px; background: #4dabf7; color: white; border-radius: 12px; text-align: center;">
+        <div style="font-size: 0.4em; margin-bottom: 10px;">Your Token Number</div>
+        <div id="modalToken" style="font-weight: bold; letter-spacing: 3px;">---</div>
+      </div>
+      <div class="modal-text" style="color: #ffa94d; font-weight: 600;">📸 Please take a screenshot of this token for your records!</div>
+      <button id="closeTokenModal" class="btn btn-primary" type="button">Continue</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { collection, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    (function(){
+      const token = sessionStorage.getItem('lastToken');
+      const name = sessionStorage.getItem('lastName') || '';
+      const tokenWrap = document.getElementById('tokenWrap');
+      const tokenEl = document.getElementById('token');
+      const chosenText = document.getElementById('chosenText');
+      const helper = document.getElementById('helperText');
+      const btnOnSpot = document.getElementById('btnOnSpot');
+      const btnOnline = document.getElementById('btnOnline');
+      const tokenModal = document.getElementById('tokenModal');
+      const modalToken = document.getElementById('modalToken');
+
+      if (!token) {
+        helper.textContent = 'Your session has expired or token was not found. Please register again.';
+        helper.style.color = '#ff6b6b';
+        btnOnSpot.disabled = true;
+        btnOnline.disabled = true;
+        return;
+      }
+
+      // Show token modal immediately
+      modalToken.textContent = token;
+      tokenModal.classList.add('show');
+
+      document.getElementById('closeTokenModal').addEventListener('click', () => {
+        tokenModal.classList.remove('show');
+      });
+
+      async function reveal(mode){
+        chosenText.textContent = mode === 'onspot' ? 'Mode: On spot' : 'Mode: Online';
+        tokenEl.textContent = token;
+        tokenWrap.style.display = '';
+
+        // Save payment/mode selection to Firebase
+        try {
+          const paymentRef = doc(collection(db, 'payments'));
+          await setDoc(paymentRef, {
+            tokenNo: token,
+            username: name,
+            mode: mode,
+            createdAt: serverTimestamp()
+          });
+          console.log('Payment mode saved:', mode);
+        } catch (error) {
+          console.error('Failed to save payment mode:', error);
+        }
+      }
+
+      btnOnSpot.addEventListener('click', () => reveal('onspot'));
+      btnOnline.addEventListener('click', () => reveal('online'));
+    })();
+  </script>
+</body>
+</html>
