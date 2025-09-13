@@ -48,7 +48,11 @@
     </div>
   </main>
 
-
+  <!-- Page Loader Overlay -->
+  <div id="pageLoader" class="page-loader" aria-live="polite" aria-busy="false">
+    <div class="spinner-standalone" aria-hidden="true"></div>
+    <div id="loaderText" class="loader-text">Redirecting to payment...</div>
+  </div>
 
   <!-- Success Modal with Token Display -->
   <div id="tokenModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="tokenTitle">
@@ -299,6 +303,10 @@
         btnOnline.addEventListener('click', async (e) => {
           // Prevent default navigation so we can save the selection first
           e.preventDefault();
+          
+          // Show loading animation immediately
+          showLoader('Preparing payment page...');
+          
           await reveal('online');
           
           // Store payment context for secure payment flow
@@ -314,7 +322,10 @@
             console.warn('Unable to store payment context:', error);
           }
           
-          window.location.href = 'payment.html';
+          // Add a small delay to show the loading animation
+          setTimeout(() => {
+            window.location.href = 'payment.html';
+          }, 800);
         });
       }
     })();

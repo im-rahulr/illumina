@@ -58,6 +58,22 @@
       content: '🔒';
       font-size: 10px;
     }
+
+    /* Check payment button styles */
+    #checkPaymentBtn {
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
+    #checkPaymentBtn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(123, 191, 68, 0.4);
+      opacity: 0.9;
+    }
+
+    #checkPaymentBtn:active {
+      transform: translateY(0);
+    }
   </style>
   <meta name="description" content="Pay your registration fee online via UPI." />
 </head>
@@ -101,6 +117,9 @@
           <div class="security-badge" style="margin-top: 8px;">
             Secure Payment Gateway
           </div>
+          <button id="checkPaymentBtn" class="btn btn-secondary" style="width: 100%; margin-top: 12px; font-size: 13px; padding: 8px 16px; background: var(--primary); color: #10210a; border: 1px solid var(--primary); display: block;">
+            Check Payment Status
+          </button>
         </div>
       </section>
 
@@ -139,6 +158,7 @@
     let paymentTimestamp = null;
 
     const openUpiBtn = document.getElementById('openUpiBtn');
+    const checkPaymentBtn = document.getElementById('checkPaymentBtn');
     const pageLoader = document.getElementById('pageLoader');
     const loaderText = document.getElementById('loaderText');
 
@@ -204,12 +224,19 @@
         console.warn('Unable to store payment context:', e);
       }
 
+      // Get user context for transaction note
+      const userContext = getUserContext();
+      let transactionNote = `Token ${userContext?.token || 'N/A'} Illumina Lowry College`;
+
       const params = new URLSearchParams({
-        pa: UPI_CONFIG.id,
-        pn: UPI_CONFIG.merchantName,
+        pa: '8050816937@ibl',
+        pn: 'MADHAVI  R',
+        mc: '0000',
+        mode: '02',
+        purpose: '00',
         am: UPI_CONFIG.amount,
         cu: 'INR',
-        tn: `${UPI_CONFIG.transactionNote} - ${transactionId}`,
+        tn: transactionNote,
         tr: transactionId // Transaction reference
       });
 
@@ -231,7 +258,7 @@
     function buildWhatsAppLink(userContext = null) {
       let message = 'hello';
 
-      if (userContext && transactionId) {
+      if (userContext) {
         message = `Hello! I have completed payment for illumina registration.
         
 Details:
@@ -299,10 +326,11 @@ Please confirm my payment status.`;
           break;
 
         case PaymentState.VERIFIED:
-          openUpiBtn.innerHTML = '<span class="btn-label">✓ Payment Verified</span>';
-          openUpiBtn.disabled = true;
-          openUpiBtn.className = 'btn btn-primary';
-          openUpiBtn.style.background = '#28a745';
+          openUpiBtn.innerHTML = '<span class="btn-label">⏳ Payment Yet to Verify</span>';
+          openUpiBtn.disabled = false;
+          openUpiBtn.className = 'btn btn-secondary';
+          openUpiBtn.style.background = '#ffc107';
+          openUpiBtn.style.color = '#212529';
           break;
       }
     }
@@ -365,6 +393,11 @@ Please confirm my payment status.`;
         setTimeout(() => {
           hideLoader();
           updateButtonState(PaymentState.AWAITING_VERIFICATION);
+
+          // Show check payment button
+          if (checkPaymentBtn) {
+            checkPaymentBtn.style.display = 'block';
+          }
 
           // Show success message with next steps
           showPaymentStatusMessage();
@@ -495,6 +528,9 @@ Please confirm my payment status.`;
           if (currentState === PaymentState.UPI_OPENED) {
             hideLoader();
             updateButtonState(PaymentState.AWAITING_VERIFICATION);
+            if (checkPaymentBtn) {
+              checkPaymentBtn.style.display = 'block';
+            }
             showPaymentStatusMessage();
           }
         }, 500);
@@ -509,6 +545,9 @@ Please confirm my payment status.`;
           if (currentState === PaymentState.UPI_OPENED) {
             hideLoader();
             updateButtonState(PaymentState.AWAITING_VERIFICATION);
+            if (checkPaymentBtn) {
+              checkPaymentBtn.style.display = 'block';
+            }
             showPaymentStatusMessage();
           }
         }, 1000);
@@ -546,19 +585,65 @@ Please confirm my payment status.`;
           timestamp: new Date().toISOString()
         });
 
-        showLoader(error.message, true);
+        const errorId = generateErrorId();
+        
+        // Track validation error
+        trackPaymentEvent('validation_failed', {
+          errorId: errorId,
+          error: error.message,
+          state: currentState,
+          timestamp: new Date().toISOString()
+        });
+
+        hideLoader();
+        showErrorSupport(error.message, errorId);
+        
+        // Don't auto-redirect, let user contact support
         setTimeout(() => {
-          hideLoader();
-          // Redirect back to registration if session is invalid
-          if (error.message.includes('session')) {
-            window.location.href = 'register.html';
-          }
-        }, 3000);
+          updateButtonState(PaymentState.INITIAL);
+        }, 1000);
       }
     });
 
+    // Check payment button click handler
+    if (checkPaymentBtn) {
+      checkPaymentBtn.addEventListener('click', () => {
+        // Detect suspicious activity
+        if (detectSuspiciousActivity()) {
+          return;
+        }
+
+        try {
+          // Validate payment session before proceeding
+          validatePaymentSession();
+          verifyPaymentStatus();
+        } catch (error) {
+          console.error('Payment verification failed:', error);
+          trackPaymentEvent('verification_validation_failed', {
+            error: error.message,
+            timestamp: new Date().toISOString()
+          });
+
+          showLoader(error.message, true);
+          setTimeout(() => {
+            hideLoader();
+          }, 3000);
+        }
+      });
+    }
+
+    // Show initial page loading animation
+    function showInitialLoader() {
+      showLoader('Loading payment page...');
+      setTimeout(() => {
+        hideLoader();
+      }, 1500); // Hide after 1.5 seconds
+    }
+
     // Initialize payment state on page load
     document.addEventListener('DOMContentLoaded', () => {
+      // Show loading animation when page loads
+      showInitialLoader();
       // Check user context from registration flow
       try {
         const userContext = sessionStorage.getItem('payment_user_context');
@@ -588,6 +673,9 @@ Please confirm my payment status.`;
             transactionId = context.transactionId;
             paymentTimestamp = context.timestamp;
             updateButtonState(PaymentState.AWAITING_VERIFICATION);
+            if (checkPaymentBtn) {
+              checkPaymentBtn.style.display = 'block';
+            }
             showPaymentStatusMessage();
           }
         }
@@ -598,24 +686,150 @@ Please confirm my payment status.`;
       console.log('Secure payment system initialized');
     });
 
+    // Generate error ID for support tracking
+    function generateErrorId() {
+      const timestamp = Date.now();
+      const random = Math.floor(Math.random() * 1000);
+      return `ERR${timestamp}${random}`.slice(-12);
+    }
+
+    // Show error support panel
+    function showErrorSupport(errorMessage, errorId) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-support-panel';
+      errorDiv.style.cssText = `
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid #dc3545;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 16px 0;
+        text-align: center;
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.5;
+      `;
+
+      errorDiv.innerHTML = `
+        <div style="color: #dc3545; font-weight: 600; margin-bottom: 8px;">
+          ⚠️ Payment Error Occurred
+        </div>
+        <div style="margin-bottom: 12px;">
+          ${errorMessage}
+        </div>
+        <div style="margin-bottom: 12px; font-size: 12px; color: var(--muted);">
+          Error ID: ${errorId}
+        </div>
+        <button id="contactSupportBtn" class="btn btn-secondary" style="width: 100%; margin-top: 8px; font-size: 13px; padding: 8px 16px; background: #dc3545; color: white; border: 1px solid #dc3545;">
+          Contact Support Team
+        </button>
+      `;
+
+      // Insert after the form card
+      const formCard = document.querySelector('.form-card');
+      if (formCard) {
+        formCard.parentNode.insertBefore(errorDiv, formCard.nextSibling);
+      }
+
+      // Add click handler for support button
+      const contactBtn = document.getElementById('contactSupportBtn');
+      if (contactBtn) {
+        contactBtn.addEventListener('click', () => {
+          contactSupportWithError(errorId, errorMessage);
+        });
+      }
+    }
+
+    // Contact support via WhatsApp with error details
+    function contactSupportWithError(errorId, errorMessage) {
+      const userContext = getUserContext();
+      
+      let supportMessage = `Hello! I'm experiencing a payment issue on illumina registration.
+
+Error Details:
+• Error ID: ${errorId}
+• Issue: ${errorMessage}
+• Time: ${new Date().toLocaleString()}`;
+
+      if (userContext) {
+        supportMessage += `
+• Name: ${userContext.name}
+• Token: ${userContext.token}`;
+      }
+
+      if (transactionId) {
+        supportMessage += `
+• Transaction ID: ${transactionId}`;
+      }
+
+      supportMessage += `
+
+Please help me resolve this issue.`;
+
+      const whatsappLink = `https://wa.me/${UPI_CONFIG.whatsappNumber}?text=${encodeURIComponent(supportMessage)}`;
+      
+      // Track support contact
+      trackPaymentEvent('support_contacted', {
+        errorId,
+        errorMessage,
+        userToken: userContext?.token,
+        timestamp: new Date().toISOString()
+      });
+
+      // Save error to Firebase for admin tracking
+      saveErrorToFirebase(errorId, errorMessage, userContext);
+
+      // Open WhatsApp
+      window.open(whatsappLink, '_blank');
+    }
+
+    // Save error to Firebase for admin panel
+    async function saveErrorToFirebase(errorId, errorMessage, userContext) {
+      try {
+        // Import Firebase functions
+        const { db } = await import('./firebase-config.js');
+        const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
+
+        const errorData = {
+          errorId: errorId,
+          errorMessage: errorMessage,
+          userToken: userContext?.token || 'Unknown',
+          userName: userContext?.name || 'Unknown',
+          transactionId: transactionId || null,
+          timestamp: serverTimestamp(),
+          status: 'open',
+          page: 'payment',
+          userAgent: navigator.userAgent,
+          url: window.location.href
+        };
+
+        await addDoc(collection(db, 'paymentErrors'), errorData);
+        console.log('Error saved to Firebase for admin tracking');
+
+      } catch (error) {
+        console.warn('Failed to save error to Firebase:', error);
+      }
+    }
+
     // Enhanced error handling and security monitoring
     window.addEventListener('error', (event) => {
       if (currentState !== PaymentState.INITIAL) {
         console.error('Payment flow error:', event.error);
 
+        const errorId = generateErrorId();
+        const errorMessage = event.error?.message || 'Unknown error occurred';
+
         // Track error for monitoring
         trackPaymentEvent('payment_error', {
-          error: event.error?.message || 'Unknown error',
+          errorId: errorId,
+          error: errorMessage,
           state: currentState,
           transactionId: transactionId,
           timestamp: new Date().toISOString()
         });
 
-        showLoader('An error occurred. Please try again.', true);
-        setTimeout(() => {
-          hideLoader();
-          updateButtonState(PaymentState.INITIAL);
-        }, 3000);
+        hideLoader();
+        showErrorSupport(errorMessage, errorId);
+        updateButtonState(PaymentState.INITIAL);
       }
     });
 
