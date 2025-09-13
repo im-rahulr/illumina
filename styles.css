@@ -1043,10 +1043,11 @@ select.input:hover {
   background: rgba(123, 191, 68, 0.1);
   border: 1px solid var(--primary);
   border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
+  padding: 16px;
+  margin: 16px 0;
   font-size: 14px;
   color: var(--text);
+  line-height: 1.5;
 }
 
 /* Error log section */
@@ -1500,4 +1501,177 @@ table td:last-child {
     padding-left: 32px;
     padding-right: 32px;
   }
+}
+
+/* Additional Admin Panel Fixes for Netlify */
+
+/* Hide admin panel initially */
+.admin-panel {
+  display: none !important;
+}
+
+/* Show admin panel only when logged in */
+.admin-container.is-logged-in .admin-panel {
+  display: block !important;
+  width: 100% !important;
+}
+
+/* Hide login form when logged in */
+.admin-container.is-logged-in #admin-login {
+  display: none !important;
+}
+
+.admin-container.is-logged-in {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  text-align: left !important;
+  width: 100% !important;
+  max-width: 1400px !important;
+  gap: 0 !important;
+}
+
+.admin-panel {
+  display: block !important;
+  width: 100% !important;
+}
+
+.toolbar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin: 20px 0 16px !important;
+  padding: 16px !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 12px !important;
+}
+
+.toolbar .actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.toolbar .meta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 0 !important;
+}
+
+.toolbar .actions .btn {
+  width: auto !important;
+  min-width: auto !important;
+  flex-shrink: 0 !important;
+}
+
+.filters {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  align-items: center !important;
+  margin: 16px 0 !important;
+  padding: 16px !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+}
+
+.filters .stat-badge {
+  margin-right: 16px !important;
+}
+
+.charts {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 16px !important;
+  width: 100% !important;
+  margin: 16px 0 24px !important;
+}
+
+.chart-card {
+  background: var(--surface) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 12px !important;
+  padding: 12px !important;
+  min-height: 360px !important;
+}
+
+.table-wrap {
+  width: 100% !important;
+  overflow-x: auto !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  background: var(--surface) !important;
+}
+
+/* Force proper button styling in admin */
+.admin-panel .btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  border: 1px solid transparent !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+}
+
+.admin-panel .btn-primary {
+  background: var(--primary) !important;
+  color: #10210a !important;
+  border-color: var(--primary-dark) !important;
+}
+
+.admin-panel .btn-secondary {
+  background: var(--line) !important;
+  color: var(--text) !important;
+  border-color: var(--surface) !important;
+}
+
+.admin-panel .btn-dark {
+  background: var(--dark) !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+
+/* Responsive fixes for admin */
+@media (max-width: 1200px) {
+  .charts {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .charts {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .toolbar .actions {
+    justify-content: center !important;
+  }
+}
+
+/* Ensure admin form is properly styled */
+.admin-container .form-card {
+  width: 100% !important;
+  max-width: 480px !important;
+  margin: 0 auto !important;
+}
+
+.admin-container:not(.is-logged-in) {
+  max-width: 720px !important;
+  align-items: center !important;
+  text-align: center !important;
 }

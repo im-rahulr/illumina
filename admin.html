@@ -7,7 +7,117 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=7">
+  <style>
+    /* Critical admin styles - inline fallback */
+    /* Hide admin panel initially */
+    .admin-panel {
+      display: none !important;
+    }
+    
+    /* Show admin panel only when logged in */
+    .admin-container.is-logged-in .admin-panel {
+      display: block !important;
+      width: 100% !important;
+    }
+    
+    .admin-container.is-logged-in {
+      max-width: 1400px !important;
+      align-items: stretch !important;
+      text-align: left !important;
+      width: 100% !important;
+    }
+    
+    /* Hide login form when logged in */
+    .admin-container.is-logged-in #admin-login {
+      display: none !important;
+    }
+    .toolbar {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      flex-wrap: wrap !important;
+      gap: 12px !important;
+      margin: 20px 0 16px !important;
+      padding: 16px !important;
+      background: var(--surface) !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 12px !important;
+    }
+    .toolbar .meta {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      margin: 0 !important;
+    }
+    .toolbar .actions {
+      display: flex !important;
+      gap: 8px !important;
+      flex-wrap: wrap !important;
+    }
+    .toolbar .actions .btn {
+      width: auto !important;
+      padding: 8px 16px !important;
+      white-space: nowrap !important;
+      font-size: 14px !important;
+    }
+    .admin-note {
+      background: rgba(123, 191, 68, 0.1) !important;
+      border: 1px solid var(--primary) !important;
+      border-radius: 8px !important;
+      padding: 16px !important;
+      margin: 16px 0 !important;
+      font-size: 14px !important;
+      color: var(--text) !important;
+    }
+    .filters {
+      display: flex !important;
+      gap: 12px !important;
+      align-items: center !important;
+      flex-wrap: wrap !important;
+      margin: 16px 0 !important;
+      padding: 16px !important;
+      background: var(--surface) !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 8px !important;
+    }
+    .filters .input {
+      width: auto !important;
+      min-width: 120px !important;
+    }
+    .filters .stat-badge {
+      margin-right: 16px !important;
+    }
+    .charts {
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 16px !important;
+      margin: 16px 0 24px !important;
+    }
+    .table-wrap {
+      margin-top: 16px !important;
+    }
+    @media (max-width: 1200px) {
+      .charts { grid-template-columns: 1fr 1fr !important; }
+    }
+    @media (max-width: 768px) {
+      .charts { grid-template-columns: 1fr !important; }
+      .toolbar { 
+        flex-direction: column !important; 
+        align-items: stretch !important;
+        gap: 16px !important;
+      }
+      .toolbar .meta,
+      .toolbar .actions {
+        justify-content: center !important;
+      }
+      .filters {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+      }
+    }
+  </style>
   <meta name="description" content="Admin panel for illumina registrations.">
   <!-- Open Graph / WhatsApp / Facebook -->
   <meta property="og:site_name" content="illumina">
