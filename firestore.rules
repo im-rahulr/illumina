@@ -22,9 +22,8 @@ service cloud.firestore {
 
       /* allow updating payment fields only */
       allow update: if
-        resource.data.diff(request.resource.data).changedKeys().hasOnly(['paymentMode','paymentAt']) &&
-        (request.resource.data.paymentMode == null || request.resource.data.paymentMode in ['onspot','online']) &&
-        (request.resource.data.paymentAt == null || request.resource.data.paymentAt is timestamp);
+        request.resource.data.diff(resource.data).changedKeys().hasOnly(['paymentMode','paymentAt']) &&
+        request.resource.data.paymentMode in ['onspot','online'];
 
       /* prevent deletes from the public */
       allow delete: if false;
@@ -42,11 +41,8 @@ service cloud.firestore {
     /* Payment/mode selections: allow create from success page */
     match /payments/{docId} {
       allow create: if request.resource.data.tokenNo is string &&
-                     request.resource.data.tokenNo.matches('^\\d{3}$') &&
                      request.resource.data.username is string &&
-                     request.resource.data.username.size() >= 1 &&
                      request.resource.data.mode in ['onspot', 'online'] &&
-                     request.resource.data.createdAt is timestamp &&
                      request.resource.data.keys().hasOnly(['tokenNo','username','mode','createdAt']);
       allow read: if true; // for admin panel access
       allow update, delete: if false;

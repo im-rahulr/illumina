@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="./styles.css?v=4">
   <style>
     .emoji-burst { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 2000; }
     .emoji { position: absolute; will-change: transform, opacity, filter; animation: burst 1400ms ease-out forwards; filter: drop-shadow(0 2px 2px rgba(0,0,0,.4)); }
@@ -16,7 +16,6 @@
       12% { opacity: 1; }
       100% { transform: translate(var(--dx, 0px), var(--dy, -160px)) scale(1.6) rotate(var(--rot, 25deg)); opacity: 0; }
     }
-    /* simple spinner keyframes kept for button spinner */
     @keyframes spin { to { transform: rotate(360deg); } }
     /* Hide scrollbars on this page only (keep scrolling functional) */
     html { overflow: hidden; }
@@ -25,109 +24,9 @@
     /* As a fallback, hide any element scrollbars */
     * { scrollbar-width: none; }
     *::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
-    
-    /* Banner styles - ensure visibility */
-    #siteBanner.site-banner {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      min-height: 44px !important;
-      background: #d0021b !important;
-      color: #fff !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      gap: 8px !important;
-      padding: 8px 44px 8px 16px !important;
-      z-index: 9999 !important;
-      box-shadow: 0 1px 0 rgba(0,0,0,.35) inset !important;
-      text-align: center !important;
-      line-height: 1.2 !important;
-      font-weight: 500 !important;
-      flex-wrap: wrap !important;
-      box-sizing: border-box !important;
-      word-wrap: anywhere !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-    }
-    
-    #siteBanner.site-banner a:link,
-    #siteBanner.site-banner a:visited { 
-      color: #fff !important; 
-      font-weight: 500 !important; 
-      text-decoration: underline !important; 
-    }
-    
-    #siteBanner.site-banner strong { 
-      font-weight: 500 !important; 
-    }
-    
-    .banner-close {
-      position: absolute !important;
-      right: 10px !important;
-      top: 50% !important;
-      transform: translateY(-50%) !important;
-      background: transparent !important;
-      color: #fff !important;
-      border: 0 !important;
-      font-size: 22px !important;
-      line-height: 1 !important;
-      cursor: pointer !important;
-    }
-    
-    /* Mobile banner adjustments */
-    @media (max-width: 480px) {
-      #siteBanner.site-banner { 
-        padding: 8px 36px 8px 12px !important; 
-        font-size: 13px !important;
-        min-height: 48px !important;
-      }
-      .banner-close { 
-        right: 6px !important; 
-        font-size: 20px !important; 
-      }
-    }
-    
-    @media (max-width: 360px) {
-      #siteBanner.site-banner { 
-        padding: 10px 32px 10px 10px !important; 
-        font-size: 12px !important;
-        min-height: 52px !important;
-      }
-      .banner-close { 
-        right: 4px !important; 
-        font-size: 18px !important; 
-      }
-    }
-    
-    /* Ensure content is pushed down when banner is present */
-    body.with-banner {
-      padding-top: var(--banner-h, 44px) !important;
-    }
-    
-    body.with-banner .container {
-      min-height: calc(100vh - var(--footer-h) - var(--banner-h, 44px)) !important;
-    }
   </style>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y0TXQST3MG"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);} 
-    gtag('js', new Date());
-    gtag('config', 'G-Y0TXQST3MG');
-  </script>
-  
-  <!-- PostHog Analytics -->
-  <script>
-    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init Re Ms Fs Pe Rs Cs capture Ve calculateEventProperties Ds register register_once register_for_session unregister unregister_for_session zs getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Ls As createPersonProfile Ns Is Us opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing is_capturing clear_opt_in_out_capturing Os debug I js getPageViewId captureTraceFeedback captureTraceMetric".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-    posthog.init('phc_UOdKm95N8QaKxaZvW1WBPdb3AqIHOTFBgf696oExyDa', {
-        api_host: 'https://us.i.posthog.com',
-        defaults: '2025-05-24',
-        person_profiles: 'identified_only',
-    })
-  </script>
+
+
   
   <meta name="description" content="Register for illumina at Lowry Adventist College.">
   <!-- Open Graph / WhatsApp / Facebook -->
@@ -136,26 +35,33 @@
   <meta property="og:title" content="Register • illumina">
   <meta property="og:description" content="Register your account for illumina at Lowry Adventist College.">
   <meta property="og:url" content="https://lac-chess.netlify.app/register.html">
-  <meta property="og:image" content="https://lac-chess.netlify.app/og-image.jpg">
+  <meta property="og:image" content="https://lac-chess.netlify.app/images/og-image.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Register • illumina">
   <meta name="twitter:description" content="Register for illumina at Lowry Adventist College.">
-  <meta name="twitter:image" content="https://lac-chess.netlify.app/og-image.jpg">
+  <meta name="twitter:image" content="https://lac-chess.netlify.app/images/og-image.jpg">
   
   </head>
 <body>
-  <div id="siteBanner" class="site-banner" role="region" aria-label="Announcement">
-    <span><strong>New trial is out</strong> — follow updates at</span>
-    <a href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">@lac_cultural_department</a>
-    <button id="closeBanner" class="banner-close" aria-label="Close announcement">×</button>
-  </div>
   
 
   <main class="container" role="main">
-    <h1 class="title">Register</h1>
+    <header class="event-header">
+      <!-- <div class="event-logo">
+        <a href="index.html"><img src="./images/lowrylogo.png" alt="Lowry Adventist College Logo"></a>
+      </div> -->
+      <div class="event-info">
+        <div class="event-breadcrumb">
+          <a href="index.html">illumina</a> <span>/</span> <span>Registration</span>
+        </div>
+        <h1 class="event-title">Register Now</h1>
+        <p class="event-subtitle">Join the Inter-College Cultural Festival</p>
+      </div>
+    </header>
+    
     <div id="liveWelcome" class="stat-badge" style="display:none">Welcome, <span id="liveName"></span> — ready to register</div>
     
 
@@ -204,6 +110,11 @@
     <!-- <div class="social-cta"><a class="login-link" href="changelog.html">View Changelog</a></div> -->
   </main>
 
+  <!-- Page Loader Overlay -->
+  <div id="pageLoader" class="page-loader" aria-live="polite" aria-busy="false">
+    <div class="spinner-standalone" aria-hidden="true"></div>
+    <div id="loaderText" class="loader-text">Submitting…</div>
+  </div>
 
   <!-- Success Modal -->
   <div id="successModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="successTitle">
@@ -214,10 +125,6 @@
       <button id="closeModal" class="btn btn-primary" type="button">Close</button>
     </div>
   </div>
-
-  
-
-  
 
   <script type="module">
     import { db } from './firebase-config.js';
@@ -287,76 +194,26 @@
       setTimeout(() => container.remove(), 2400);
     }
 
-    let bannerDismissed = false;
-    // Announcement banner logic - ensure it's always visible and stays hidden after dismiss (runtime only)
-    function setupBanner() {
-      try {
-        const banner = document.getElementById('siteBanner');
-        if (!banner) {
-          console.warn('Banner element not found');
-          return;
-        }
-
-        const isDismissed = bannerDismissed === true || banner.dataset.closed === '1';
-        if (isDismissed) {
-          banner.style.setProperty('display', 'none', 'important');
-          document.body.classList.remove('with-banner');
-          document.documentElement.style.setProperty('--banner-h', '0px');
-          document.body.style.paddingTop = '0px';
-          return;
-        }
-
-        // Force banner to be visible
-        banner.style.display = 'flex';
-        banner.style.visibility = 'visible';
-        banner.style.opacity = '1';
-        banner.style.position = 'fixed';
-        banner.style.top = '0';
-        banner.style.left = '0';
-        banner.style.right = '0';
-        banner.style.zIndex = '9999';
-        banner.style.background = '#d0021b';
-        banner.style.color = '#fff';
-        
-        // Add banner class to body
-        document.body.classList.add('with-banner');
-        
-        // Calculate and set banner height
-        const h = banner.getBoundingClientRect().height || 44;
-        document.documentElement.style.setProperty('--banner-h', h + 'px');
-        document.body.style.paddingTop = h + 'px';
-        
-        // Add close button functionality (bind once)
-        const btn = document.getElementById('closeBanner');
-        if (btn && !btn.dataset.bound) {
-          btn.dataset.bound = '1';
-          btn.addEventListener('click', () => {
-            bannerDismissed = true;
-            banner.dataset.closed = '1';
-            banner.style.setProperty('display', 'none', 'important');
-            document.body.classList.remove('with-banner');
-            document.documentElement.style.setProperty('--banner-h', '0px');
-            document.body.style.paddingTop = '0px';
-          });
-        }
-        
-        console.log('Banner setup complete, height:', h);
-      } catch (error) {
-        console.error('Banner setup failed:', error);
-      }
-    }
-    
-    // Setup banner immediately and after DOM is ready
-    setupBanner();
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setupBanner);
-    }
-    window.addEventListener('load', setupBanner);
-
     const form = document.querySelector('form');
     const liveWelcome = document.getElementById('liveWelcome');
     const liveName = document.getElementById('liveName');
     const nameInput = document.getElementById('username');
+    const pageLoader = document.getElementById('pageLoader');
+    const loaderText = document.getElementById('loaderText');
+
+    function showLoader(message){
+      if (loaderText) loaderText.textContent = message || 'Submitting…';
+      if (pageLoader) {
+        pageLoader.classList.add('show');
+        pageLoader.setAttribute('aria-busy','true');
+      }
+    }
+    function hideLoader(){
+      if (pageLoader) {
+        pageLoader.classList.remove('show');
+        pageLoader.setAttribute('aria-busy','false');
+      }
+    }
     nameInput.addEventListener('input', () => {
       const v = nameInput.value.trim();
       if (v.length > 0) {
@@ -418,6 +275,7 @@
       submitBtn.classList.add('is-loading');
       submitBtn.setAttribute('aria-busy','true');
       if (btnLabel) btnLabel.textContent = 'Submitting…';
+      showLoader('Submitting your registration…');
       try {
         // Parallel: IP fetch
         const ipPromise = getIpFast();
@@ -501,7 +359,7 @@
         // Optional celebration before redirect
         playSuccessSound();
         burstEmojis();
-        // Quick redirect to success page
+        // Quick redirect to success page (keep loader visible until navigation)
         window.location.href = 'success.html';
       } catch (err) {
         console.error('Registration error:', err);
@@ -536,10 +394,10 @@
         submitBtn.classList.remove('is-loading');
         submitBtn.removeAttribute('aria-busy');
         if (btnLabel) btnLabel.textContent = previousLabel;
+        // Hide loader only if we're still on this page (i.e., an error occurred)
+        hideLoader();
       }
     });
   </script>
 </body>
 </html>
-
-
