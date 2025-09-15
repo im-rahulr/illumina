@@ -405,11 +405,14 @@
   <!-- Payment Status Popup -->
   <div id="paymentPopup" class="payment-popup-overlay">
     <div class="payment-popup">
-      <h2>Check Payment Status</h2>
-      <p>Have you completed the payment? Please confirm your payment status to proceed with registration.</p>
+      <h2>Payment Confirmation</h2>
+      <p>Please scan the QR code to make payment. After completing the payment, click "Check Payment Status" for manual verification.</p>
+      <div style="margin: 16px 0; padding: 12px; background: rgba(255, 193, 7, 0.1); border: 1px solid #ffc107; border-radius: 8px; font-size: 14px; color: #856404;">
+        <strong>Note:</strong> Payment confirmation will be done manually by our team. Please wait for verification after payment.
+      </div>
       <div>
-        <button id="paymentCompletedBtn" class="btn btn-primary">Yes, Payment Done</button>
-        <button id="paymentPendingBtn" class="btn btn-secondary">Not Yet</button>
+        <button id="paymentCompletedBtn" class="btn btn-primary">Check Payment Status</button>
+        <button id="paymentPendingBtn" class="btn btn-secondary">Not Yet, Try Again</button>
       </div>
     </div>
   </div>
@@ -421,7 +424,7 @@
       amount: '250',
       merchantName: 'MADHAVI',
       transactionNote: 'ILLUMINA Registration Fee',
-      whatsappNumber: '7349321463'
+      whatsappNumber: '9739904620'
     };
 
     // Payment state management
@@ -508,7 +511,7 @@
       let transactionNote = `Token ${userContext?.token || 'N/A'} ILLUMINA Lowry College`;
 
       const params = new URLSearchParams({
-        pa: '8050816937@ibl',
+        pa: '9739904620@ybl',
         pn: 'MADHAVI  R',
         mc: '0000',
         mode: '02',
@@ -721,9 +724,14 @@ Please confirm my payment status.`;
     // Handle payment status verification via WhatsApp
     function verifyPaymentStatus() {
       try {
-        // Show popup instead of direct WhatsApp redirect
-        showPaymentStatusPopup();
-
+        const userContext = getUserContext();
+        const whatsappLink = buildWhatsAppLink(userContext);
+        window.location.href = whatsappLink;
+        trackPaymentEvent('whatsapp_verification_initiated', {
+          transactionId,
+          timestamp: new Date().toISOString()
+        });
+        showVerificationMessage();
       } catch (error) {
         console.error('Payment verification failed:', error);
         trackPaymentEvent('verification_failed', { error: error.message });
@@ -737,39 +745,13 @@ Please confirm my payment status.`;
     // Handle payment completed confirmation
     function handlePaymentCompleted() {
       hidePaymentStatusPopup();
-      showLoader('Redirecting to WhatsApp for verification...');
-
-      // Get user context for personalized message
-      const userContext = getUserContext();
-      const whatsappLink = buildWhatsAppLink(userContext);
-      console.log('Redirecting to WhatsApp for payment verification');
-
-      // Track verification attempt
-      trackPaymentEvent('verification_initiated', {
-        transactionId,
-        userToken: userContext?.token,
-        timestamp: new Date().toISOString()
-      });
-
-      // Open WhatsApp in new tab/window
-      setTimeout(() => {
-        const whatsappWindow = window.open(whatsappLink, '_blank');
-        hideLoader();
-
-        // Check if WhatsApp opened successfully
-        if (whatsappWindow && !whatsappWindow.closed) {
-          showVerificationMessage();
-          updateButtonState(PaymentState.VERIFIED);
-        } else {
-          // Fallback: direct navigation
-          window.location.href = whatsappLink;
-        }
-      }, 1000);
+      initiateUpiPayment();
     }
 
     // Handle payment pending
     function handlePaymentPending() {
       hidePaymentStatusPopup();
+      // Keep the popup available for retry
       updateButtonState(PaymentState.INITIAL);
     }
 
@@ -874,7 +856,8 @@ Please confirm my payment status.`;
 
         switch (currentState) {
           case PaymentState.INITIAL:
-            initiateUpiPayment();
+            // Show payment popup immediately instead of UPI flow
+            showPaymentStatusPopup();
             break;
 
           case PaymentState.AWAITING_VERIFICATION:

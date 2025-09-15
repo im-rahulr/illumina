@@ -304,6 +304,29 @@
         grid-template-columns: 1fr !important;
         gap: 16px !important;
       }
+      
+      /* Ensure modal fits on small screens */
+      @media (max-height: 700px) {
+        .modal-card.success {
+          max-height: 85vh !important;
+          padding: 16px !important;
+        }
+        
+        #tokenTitle {
+          font-size: 22px !important;
+          margin-bottom: 8px !important;
+        }
+        
+        #modalUserName {
+          font-size: 16px !important;
+          margin-bottom: 8px !important;
+        }
+        
+        #modalToken {
+          font-size: 28px !important;
+          margin-bottom: 12px !important;
+        }
+      }
     }
   </style>
   <meta name="description" content="Complete your ILLUMINA registration by selecting payment method.">
@@ -417,27 +440,27 @@
 
   <!-- Success Modal with Token Display -->
   <div id="tokenModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="tokenTitle">
-    <div class="modal-card success" style="max-width: 600px; width: 95vw;">
+    <div class="modal-card success" style="max-width: 480px; width: 90vw; max-height: 90vh; overflow-y: auto;">
       <div id="tokenTitle" class="modal-title" style="font-size: 28px; margin-bottom: 12px;">🎉 Thank you for registering for ILLUMINA 2K25!</div>
       <div id="modalUserName" class="modal-text" style="font-size: 18px; font-weight: 500; margin-bottom: 12px; color: var(--muted);">Welcome, [Name]!</div>
       <div class="modal-text" style="font-size: 16px; font-weight: 500; margin-bottom: 24px; color: var(--primary);">Event Date: September 25, 2025</div>
       
-      <div style="background: var(--surface); border: 2px solid var(--primary); border-radius: 12px; padding: 24px; margin: 20px 0; text-align: center;">
-        <div style="font-size: 14px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Token Number</div>
-        <div id="modalToken" style="font-size: 36px; font-weight: 700; color: var(--primary); letter-spacing: 2px; margin-bottom: 20px;">---</div>
+      <div style="background: var(--surface); border: 2px solid var(--primary); border-radius: 12px; padding: 16px; margin: 16px 0; text-align: center;">
+        <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Token Number</div>
+        <div id="modalToken" style="font-size: 32px; font-weight: 700; color: var(--primary); letter-spacing: 2px; margin-bottom: 16px;">---</div>
         
         <!-- QR Code Section -->
-        <div style="border-top: 1px solid var(--line); padding-top: 20px;">
-          <div style="font-size: 14px; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">QR Code</div>
-          <div id="qrCodeContainer" style="display: flex; justify-content: center; align-items: center; min-height: 150px; background: #fff; border-radius: 8px; padding: 15px;">
+        <div style="border-top: 1px solid var(--line); padding-top: 16px;">
+          <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">QR Code</div>
+          <div id="qrCodeContainer" style="display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 6px; padding: 8px;">
             <canvas id="modalQRCanvas"></canvas>
           </div>
         </div>
       </div>
       
-      <div class="modal-text" style="color: var(--muted); font-size: 14px; margin-bottom: 24px; text-align: center;">Present this token and QR code at the venue</div>
+      <div class="modal-text" style="color: var(--muted); font-size: 13px; margin-bottom: 16px; text-align: center;">Present this token and QR code at the venue</div>
       
-      <button id="downloadTicketModal" class="btn btn-primary" type="button" style="width: 100%; padding: 14px; font-weight: 600;">
+      <button id="downloadTicketModal" class="btn btn-primary" type="button" style="width: 100%; padding: 12px; font-weight: 600;">
         📥 Download RSVP
       </button>
     </div>
@@ -546,7 +569,7 @@
         });
         await QRCode.toCanvas(canvas, payload, {
           width: size,
-          margin: 1,
+          margin: 0,
           errorCorrectionLevel: 'M',
           color: { dark: '#000000', light: '#FFFFFF' }
         });
@@ -559,9 +582,9 @@
           const canvas = document.getElementById('modalQRCanvas');
           if (!canvas) return;
           
-          // Set canvas size for modal display
-          canvas.width = 150;
-          canvas.height = 150;
+          // Set canvas size for modal display (smaller for better fit)
+          canvas.width = 120;
+          canvas.height = 120;
           
           // Encode meaningful verification payload
           const payload = JSON.stringify({
@@ -575,8 +598,8 @@
           });
           
           await QRCode.toCanvas(canvas, payload, {
-            width: 150,
-            margin: 1,
+            width: 120,
+            margin: 0,
             errorCorrectionLevel: 'M',
             color: { dark: '#000000', light: '#FFFFFF' }  // Black QR code
           });
@@ -588,8 +611,8 @@
           const canvas = document.getElementById('modalQRCanvas');
           if (canvas) {
             const ctx = canvas.getContext('2d');
-            canvas.width = 150;
-            canvas.height = 150;
+            canvas.width = 120;
+            canvas.height = 120;
             ctx.fillStyle = '#f0f0f0';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#666';
@@ -700,21 +723,38 @@
         ctx.fillStyle = '#7bbf44';
         ctx.fillText('Please present this ticket at the venue', canvas.width / 2, 480);
         
-        // Generate and add QR code (scannable)
-        const qrCanvas = await generateQRCode(tokenNo, 140);
-        ctx.drawImage(qrCanvas, canvas.width - 180, canvas.height - 180, 140, 140);
+        // Generate and add QR code (scannable but compact)
+        const qrCanvas = await generateQRCode(tokenNo, 120);
+        ctx.drawImage(qrCanvas, canvas.width - 160, canvas.height - 160, 120, 120);
         
         // QR code label
         ctx.font = '12px Arial';
         ctx.fillStyle = '#B3B3B3';
         ctx.textAlign = 'center';
-        ctx.fillText('Scan for verification', canvas.width - 100, canvas.height - 25);
+        ctx.fillText('Scan for verification', canvas.width - 100, canvas.height - 20);
         
-        // Download the image
-        const link = document.createElement('a');
-        link.download = `ILLUMINA-2K25-ticket-${tokenNo}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
+        // Download the image with proper MIME type and error handling
+        try {
+          const dataURL = canvas.toDataURL('image/png', 1.0);
+          const link = document.createElement('a');
+          link.download = `ILLUMINA-2K25-ticket-${tokenNo}.png`;
+          link.href = dataURL;
+          
+          // Ensure the link is added to DOM for better browser compatibility
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Clean up the data URL
+          setTimeout(() => {
+            URL.revokeObjectURL(dataURL);
+          }, 100);
+          
+          console.log('Ticket download initiated successfully');
+        } catch (error) {
+          console.error('Failed to download ticket:', error);
+          throw new Error('Download failed. Please try again.');
+        }
       }
 
 
