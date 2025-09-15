@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,24 +15,25 @@
     .admin-panel {
       display: none !important;
     }
-    
+
     /* Show admin panel only when logged in */
     .admin-container.is-logged-in .admin-panel {
       display: block !important;
       width: 100% !important;
     }
-    
+
     .admin-container.is-logged-in {
       max-width: 1400px !important;
       align-items: stretch !important;
       text-align: left !important;
       width: 100% !important;
     }
-    
+
     /* Hide login form when logged in */
     .admin-container.is-logged-in #admin-login {
       display: none !important;
     }
+
     .toolbar {
       display: flex !important;
       justify-content: space-between !important;
@@ -44,23 +46,27 @@
       border: 1px solid var(--line) !important;
       border-radius: 12px !important;
     }
+
     .toolbar .meta {
       display: flex !important;
       align-items: center !important;
       gap: 12px !important;
       margin: 0 !important;
     }
+
     .toolbar .actions {
       display: flex !important;
       gap: 8px !important;
       flex-wrap: wrap !important;
     }
+
     .toolbar .actions .btn {
       width: auto !important;
       padding: 8px 16px !important;
       white-space: nowrap !important;
       font-size: 14px !important;
     }
+
     .admin-note {
       background: rgba(123, 191, 68, 0.1) !important;
       border: 1px solid var(--primary) !important;
@@ -70,6 +76,7 @@
       font-size: 14px !important;
       color: var(--text) !important;
     }
+
     .filters {
       display: flex !important;
       gap: 12px !important;
@@ -81,41 +88,88 @@
       border: 1px solid var(--line) !important;
       border-radius: 8px !important;
     }
+
     .filters .input {
       width: auto !important;
       min-width: 120px !important;
     }
+
     .filters .stat-badge {
       margin-right: 16px !important;
     }
+
     .charts {
       display: grid !important;
       grid-template-columns: repeat(4, 1fr) !important;
       gap: 16px !important;
       margin: 16px 0 24px !important;
     }
+
     .table-wrap {
       margin-top: 16px !important;
     }
+
     @media (max-width: 1200px) {
-      .charts { grid-template-columns: 1fr 1fr !important; }
+      .charts {
+        grid-template-columns: 1fr 1fr !important;
+      }
     }
+
     @media (max-width: 768px) {
-      .charts { grid-template-columns: 1fr !important; }
-      .toolbar { 
-        flex-direction: column !important; 
+      .charts {
+        grid-template-columns: 1fr !important;
+      }
+
+      .toolbar {
+        flex-direction: column !important;
         align-items: stretch !important;
         gap: 16px !important;
       }
+
       .toolbar .meta,
       .toolbar .actions {
         justify-content: center !important;
       }
+
       .filters {
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 12px !important;
       }
+    }
+
+    /* QR Code Modal Styles */
+    #qrModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    #qrModal.show {
+      display: flex;
+    }
+
+    #qrModal .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      animation: popIn 0.3s ease-out;
+    }
+
+    /* QR Code table cell styles */
+    .admin-panel table td canvas {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .admin-panel table td canvas:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(123, 191, 68, 0.4);
     }
   </style>
   <meta name="description" content="Admin panel for illumina registrations.">
@@ -137,20 +191,21 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y0TXQST3MG"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);} 
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-Y0TXQST3MG');
   </script>
   <!-- PostHog Analytics -->
   <script>
-    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init Re Ms Fs Pe Rs Cs capture Ve calculateEventProperties Ds register register_once register_for_session unregister unregister_for_session zs getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Ls As createPersonProfile Ns Is Us opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing is_capturing clear_opt_in_out_capturing Os debug I js getPageViewId captureTraceFeedback captureTraceMetric".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.crossOrigin = "anonymous", p.async = !0, p.src = s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "init Re Ms Fs Pe Rs Cs capture Ve calculateEventProperties Ds register register_once register_for_session unregister unregister_for_session zs getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Ls As createPersonProfile Ns Is Us opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing is_capturing clear_opt_in_out_capturing Os debug I js getPageViewId captureTraceFeedback captureTraceMetric".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
     posthog.init('phc_UOdKm95N8QaKxaZvW1WBPdb3AqIHOTFBgf696oExyDa', {
-        api_host: 'https://us.i.posthog.com',
-        defaults: '2025-05-24',
-        person_profiles: 'identified_only',
+      api_host: 'https://us.i.posthog.com',
+      defaults: '2025-05-24',
+      person_profiles: 'identified_only',
     })
   </script>
 </head>
+
 <body>
   <div id="pageLoader" class="page-loader" aria-live="polite" aria-busy="true">
     <div class="spinner-standalone" aria-hidden="true"></div>
@@ -177,13 +232,14 @@
             <button id="togglePass" class="btn-icon" type="button" aria-label="Show password">👁️</button>
           </div>
         </div>
-        <button class="btn btn-primary" type="submit">Login</button>      </div>
+        <button class="btn btn-primary" type="submit">Login</button>
+      </div>
     </form>
 
     <section id="admin-panel" class="admin-panel" style="display:none; width:100%;">
       <div class="toolbar">
         <div class="meta">
-          Registrations 
+          Registrations
           <span class="live"><span id="liveDot" class="live-dot"></span>Live</span>
           <span id="statusIndicator" class="status-indicator">Connecting...</span>
         </div>
@@ -191,24 +247,34 @@
           <input id="searchBox" class="input search" placeholder="Search name, Token No, IP..." />
           <button id="exportCsv" class="btn btn-dark">Export CSV</button>
           <button id="debugIds" class="btn btn-secondary">Debug IDs</button>
-          <button id="showErrors" class="btn btn-secondary">Error Log <span id="errorCount" class="badge" aria-label="unread errors">0</span></button>
+          <button id="showErrors" class="btn btn-secondary">Error Log <span id="errorCount" class="badge"
+              aria-label="unread errors">0</span></button>
           <button id="runTests" class="btn btn-secondary">Run Tests</button>
           <button id="refreshData" class="btn btn-primary">Refresh</button>
+          <button id="logoutBtn" class="btn btn-secondary">Logout</button>
         </div>
       </div>
       <div class="admin-note">
-        <strong>Note:</strong> New registrations will show a Token No (3-digit number). Older registrations may show empty Token No fields. The Token No is generated uniquely for each registration and should match what was shown to the user during registration.
+        <strong>Note:</strong> New registrations will show a Token No (3-digit number). Older registrations may show
+        empty Token No fields. The Token No is generated uniquely for each registration and should match what was shown
+        to the user during registration.
       </div>
-      
-      <button id="showVerificationToggle" class="btn btn-secondary" style="margin-bottom: 20px;">
-        Show Ticket Verification
-      </button>
+
+      <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+        <button id="showVerificationToggle" class="btn btn-secondary">
+          Show Ticket Verification
+        </button>
+        <a href="rsvp-management.html" class="btn btn-primary" style="text-decoration: none;">
+          🎫 RSVP Management
+        </a>
+      </div>
 
       <!-- Hidden by default, can be toggled -->
       <div class="form-card" id="ticketVerificationSection" style="display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <h2 style="margin:0;">Ticket Verification</h2>
-          <button id="toggleVerificationSection" class="btn-icon" style="font-size:1.2em;" aria-label="Hide verification section">
+          <button id="toggleVerificationSection" class="btn-icon" style="font-size:1.2em;"
+            aria-label="Hide verification section">
             <span>−</span>
           </button>
         </div>
@@ -218,14 +284,17 @@
             Open QR Scanner
           </a>
           <!-- User Details Display -->
-          <div id="userDetailsCard" style="display: none; margin-top: 16px; padding: 20px; background: var(--bg); border: 2px solid var(--primary); border-radius: 12px;">
+          <div id="userDetailsCard"
+            style="display: none; margin-top: 16px; padding: 20px; background: var(--bg); border: 2px solid var(--primary); border-radius: 12px;">
             <h4 style="margin: 0 0 16px; color: var(--primary);">👤 User Details</h4>
             <div id="userDetailsContent"></div>
             <button id="closeUserDetails" class="btn btn-secondary" style="margin-top: 16px;">Close</button>
           </div>
         </div>
       </div>
-      
+
+
+
       <!-- Error Log Section -->
       <div id="errorLogSection" class="error-log-section" style="display:none;">
         <h3>Error Log</h3>
@@ -259,17 +328,21 @@
         <div class="chart-card"><canvas id="byCoursePct"></canvas></div>
       </div>
       <div class="table-wrap">
-        <div id="tableLoading" class="loading-overlay"><div class="spinner-standalone"></div></div>
+        <div id="tableLoading" class="loading-overlay">
+          <div class="spinner-standalone"></div>
+        </div>
         <table>
           <thead>
             <tr>
               <th>#</th>
               <th>Username</th>
+              <th>Phone</th>
               <th>Course</th>
               <th>Payment</th>
               <th>College</th>
               <th>IP</th>
               <th>Token No</th>
+              <th>QR Code</th>
               <th>Created</th>
             </tr>
           </thead>
@@ -277,7 +350,7 @@
         </table>
         <div id="emptyState" class="empty-state" style="display:none;">No results match your filter.</div>
       </div>
-      
+
       <!-- Diagnostics Modal -->
       <div id="testModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="testTitle">
         <div class="modal-card success">
@@ -289,8 +362,8 @@
       </div>
     </section>
   </main>
- <br>
- 
+  <br>
+
   <!-- <footer class="footer" role="contentinfo">
     <small>Designed by CodeCraft • <a class="login-link" href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">Instagram</a></small>
   </footer> -->
@@ -316,7 +389,7 @@
           document.body.classList.remove('with-banner');
         });
       }
-    } catch {}
+    } catch { }
 
     const loginForm = document.getElementById('admin-login');
     const panel = document.getElementById('admin-panel');
@@ -328,11 +401,54 @@
       input.type = isPwd ? 'text' : 'password';
       toggleBtn.setAttribute('aria-label', isPwd ? 'Hide password' : 'Show password');
     });
-    // Auto-fill if remembered
+    // Auto-fill if remembered and auto-login if persistent login is enabled
     const remembered = localStorage.getItem('adminRemember') === '1';
+    const persistentLogin = localStorage.getItem('adminPersistentLogin') === '1';
+
     if (remembered) {
       document.getElementById('adminUser').value = 'admin';
       document.getElementById('adminPass').value = 'lowry@123';
+    }
+
+    // Auto-login if persistent login is enabled
+    if (persistentLogin) {
+      setTimeout(async () => {
+        showPageLoader('Auto-signing you in…');
+        loginForm.style.display = 'none';
+        panel.style.display = '';
+        const mainEl = document.querySelector('main.container.admin-container');
+        if (mainEl) mainEl.classList.add('is-logged-in');
+        try {
+          await initDataFeed();
+          // Start a light real-time feed for errorLogs so admins see user issues immediately
+          try {
+            const errRef = query(collection(db, 'errorLogs'), orderBy('timestamp', 'desc'));
+            onSnapshot(errRef, (snap) => {
+              const list = [];
+              snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+              errorLog.dbErrors = list;
+              errorLog.updateDisplay();
+              const badge = document.getElementById('errorCount');
+              if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length || 0));
+            }, (err) => {
+              errorLog.addError('DB_ERROR_LISTEN', 'Failed to listen to error logs', err);
+            });
+          } catch (err) {
+            errorLog.addError('DB_ERROR_LISTEN', 'Error setting up error log listener', err);
+          }
+        } catch (eInit) {
+          // Initialization failed; show message and keep panel visible so user can retry refresh
+          errorLog.addError('INIT_LOGIN_FAIL', 'Failed during initialization after auto-login', eInit);
+          const statusIndicator = document.getElementById('statusIndicator');
+          if (statusIndicator) {
+            statusIndicator.textContent = 'Init Error';
+            statusIndicator.className = 'status-indicator error';
+          }
+          alert('Could not load data. You can click Refresh to retry. See Error Log for details.');
+        } finally {
+          hidePageLoader();
+        }
+      }, 500);
     }
 
     // Add remember me toggle
@@ -343,6 +459,15 @@
     rememberToggle.style.gap = '6px';
     rememberToggle.innerHTML = `<input id="rememberMe" type="checkbox" ${remembered ? 'checked' : ''}> Remember me`;
     loginForm.querySelector('.form-grid').appendChild(rememberToggle);
+
+    // Add persistent login toggle
+    const persistentToggle = document.createElement('label');
+    persistentToggle.className = 'helper';
+    persistentToggle.style.display = 'inline-flex';
+    persistentToggle.style.alignItems = 'center';
+    persistentToggle.style.gap = '6px';
+    persistentToggle.innerHTML = `<input id="persistentLogin" type="checkbox" ${persistentLogin ? 'checked' : ''}> Stay logged in`;
+    loginForm.querySelector('.form-grid').appendChild(persistentToggle);
 
     // Page loader helpers
     const pageLoader = document.getElementById('pageLoader');
@@ -363,6 +488,7 @@
       if (u.toLowerCase() === 'admin' && p === 'lowry@123') {
         showPageLoader('Signing you in…');
         localStorage.setItem('adminRemember', document.getElementById('rememberMe').checked ? '1' : '0');
+        localStorage.setItem('adminPersistentLogin', document.getElementById('persistentLogin').checked ? '1' : '0');
         loginForm.style.display = 'none';
         panel.style.display = '';
         const mainEl = document.querySelector('main.container.admin-container');
@@ -378,7 +504,7 @@
               errorLog.dbErrors = list;
               errorLog.updateDisplay();
               const badge = document.getElementById('errorCount');
-              if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length||0));
+              if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length || 0));
             }, (err) => {
               errorLog.addError('DB_ERROR_LISTEN', 'Failed to listen to error logs', err);
             });
@@ -406,14 +532,14 @@
     const verificationSection = document.getElementById('ticketVerificationSection');
     const showVerificationToggle = document.getElementById('showVerificationToggle');
     const toggleVerificationBtn = document.getElementById('toggleVerificationSection');
-    
+
     if (showVerificationToggle && verificationSection) {
       showVerificationToggle.addEventListener('click', () => {
         verificationSection.style.display = '';
         showVerificationToggle.style.display = 'none';
       });
     }
-    
+
     if (toggleVerificationBtn && verificationSection) {
       toggleVerificationBtn.addEventListener('click', () => {
         verificationSection.style.display = 'none';
@@ -423,7 +549,7 @@
       });
     }
 
-    // Close user details card
+    // Close user details card (for ticket verification)
     document.getElementById('closeUserDetails')?.addEventListener('click', () => {
       const card = document.getElementById('userDetailsCard');
       if (card) card.style.display = 'none';
@@ -435,7 +561,7 @@
     const errorLog = {
       errors: [],
       dbErrors: [],
-      addError: function(type, message, details = null) {
+      addError: function (type, message, details = null) {
         const error = {
           timestamp: new Date().toISOString(),
           type: type,
@@ -447,10 +573,10 @@
         this.updateDisplay();
         this.saveToStorage();
       },
-      updateDisplay: function() {
+      updateDisplay: function () {
         const localContent = document.getElementById('localErrorContent');
         const dbContent = document.getElementById('dbErrorContent');
-        
+
         if (localContent) {
           localContent.innerHTML = this.errors.map(error => `
             <div class="error-entry">
@@ -463,7 +589,7 @@
             </div>
           `).join('');
         }
-        
+
         if (dbContent) {
           dbContent.innerHTML = this.dbErrors.map(error => `
             <div class="error-entry">
@@ -477,14 +603,14 @@
           `).join('');
         }
       },
-      saveToStorage: function() {
+      saveToStorage: function () {
         try {
           localStorage.setItem('adminErrorLog', JSON.stringify(this.errors.slice(-50))); // Keep last 50 errors
         } catch (e) {
           console.warn('Failed to save error log to localStorage');
         }
       },
-      loadFromStorage: function() {
+      loadFromStorage: function () {
         try {
           const stored = localStorage.getItem('adminErrorLog');
           if (stored) {
@@ -495,12 +621,12 @@
           console.warn('Failed to load error log from localStorage');
         }
       },
-      clear: function() {
+      clear: function () {
         this.errors = [];
         this.updateDisplay();
         this.saveToStorage();
       },
-      export: function() {
+      export: function () {
         const data = JSON.stringify(this.errors, null, 2);
         const blob = new Blob([data], { type: 'application/json' });
         const a = document.createElement('a');
@@ -509,7 +635,7 @@
         a.click();
         URL.revokeObjectURL(a.href);
       },
-      loadDbErrors: async function() {
+      loadDbErrors: async function () {
         try {
           const q = query(collection(db, 'errorLogs'), orderBy('timestamp', 'desc'), limit(100));
           const snap = await getDocs(q);
@@ -527,12 +653,12 @@
 
     // Load error log on page load and keep unread count
     errorLog.loadFromStorage();
-    function updateErrorBadge(){
+    function updateErrorBadge() {
       const badge = document.getElementById('errorCount');
-      if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length||0));
+      if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length || 0));
     }
     const _addErrorRef = errorLog.addError.bind(errorLog);
-    errorLog.addError = function(type, message, details){
+    errorLog.addError = function (type, message, details) {
       _addErrorRef(type, message, details);
       updateErrorBadge();
     };
@@ -541,26 +667,26 @@
     let unsubscribe = null;
     let connectionRetries = 0;
     const maxRetries = 3;
-    
-    async function initDataFeed(){
+
+    async function initDataFeed() {
       const tbody = document.getElementById('rows');
       const statusIndicator = document.getElementById('statusIndicator');
-      
+
       tbody.innerHTML = '';
       document.getElementById('tableLoading').classList.add('show');
       document.getElementById('liveDot').classList.remove('on');
-      
+
       // Update status
       if (statusIndicator) {
         statusIndicator.textContent = 'Connecting...';
         statusIndicator.className = 'status-indicator loading';
       }
-      
+
       try {
         // Test database connection first
         const testQuery = query(collection(db, 'registrations'), limit(1));
         await getDocs(testQuery);
-        
+
         let qRef;
         try {
           qRef = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
@@ -568,9 +694,9 @@
           errorLog.addError('QUERY_ERROR', 'Failed to create ordered query, using basic query', e);
           qRef = collection(db, 'registrations');
         }
-        
+
         if (unsubscribe) unsubscribe();
-        
+
         unsubscribe = onSnapshot(qRef, (snap) => {
           try {
             const rows = [];
@@ -582,25 +708,25 @@
                 errorLog.addError('DOC_PARSE_ERROR', `Failed to parse document ${doc.id}`, docError);
               }
             });
-            
+
             renderWithFilters(rows);
             document.getElementById('tableLoading').classList.remove('show');
             document.getElementById('liveDot').classList.add('on');
             connectionRetries = 0; // Reset retry counter on success
-            
+
             // Update status
             if (statusIndicator) {
               statusIndicator.textContent = `Connected (${rows.length} records)`;
               statusIndicator.className = 'status-indicator connected';
             }
-            
+
             // Log successful data load
             console.log(`Successfully loaded ${rows.length} registrations`);
-            
+
           } catch (renderError) {
             errorLog.addError('RENDER_ERROR', 'Failed to render data', renderError);
             document.getElementById('tableLoading').classList.remove('show');
-            
+
             if (statusIndicator) {
               statusIndicator.textContent = 'Render Error';
               statusIndicator.className = 'status-indicator error';
@@ -609,16 +735,16 @@
         }, (err) => {
           connectionRetries++;
           errorLog.addError('CONNECTION_ERROR', `Database connection failed (attempt ${connectionRetries}/${maxRetries})`, err);
-          
+
           document.getElementById('tableLoading').classList.remove('show');
           document.getElementById('liveDot').classList.remove('on');
-          
+
           // Update status
           if (statusIndicator) {
             statusIndicator.textContent = `Connection Error (${connectionRetries}/${maxRetries})`;
             statusIndicator.className = 'status-indicator error';
           }
-          
+
           if (connectionRetries < maxRetries) {
             // Retry after delay
             setTimeout(() => {
@@ -630,28 +756,28 @@
             alert('Failed to connect to database after multiple attempts. Check the error log for details.');
           }
         });
-        
+
       } catch (initialError) {
         errorLog.addError('INIT_ERROR', 'Failed to initialize data feed', initialError);
         document.getElementById('tableLoading').classList.remove('show');
-        
+
         if (statusIndicator) {
           statusIndicator.textContent = 'Init Error';
           statusIndicator.className = 'status-indicator error';
         }
-        
+
         alert('Failed to initialize database connection. Check the error log for details.');
       }
     }
 
-    function renderWithFilters(all){
+    function renderWithFilters(all) {
       try {
         const tbody = document.getElementById('rows');
         if (!tbody) {
           errorLog.addError('RENDER_ERROR', 'Table body element not found');
           return;
         }
-        
+
         // Ensure consistent recent-first ordering even if backend ordering fails
         const ordered = [...all].sort((a, b) => {
           try {
@@ -663,41 +789,72 @@
             return 0;
           }
         });
-        
+
         const fc = document.getElementById('filterCourse')?.value || '';
         const q = document.getElementById('searchBox')?.value?.trim().toLowerCase() || '';
-        
+
         const filtered = ordered.filter(r => {
           try {
-            return (fc ? r.course === fc : true) && 
-                   (fy ? String(r.year) === fy : true) && 
-                   (q ? (
-                     String(r.username||'').toLowerCase().includes(q) ||
-                     String(r.shortId||'N/A').toLowerCase().includes(q) ||
-                     String(r.ip||'').toLowerCase().includes(q)
-                   ) : true);
+            return (fc ? r.course === fc : true) &&
+              (fy ? String(r.year) === fy : true) &&
+              (q ? (
+                String(r.username || '').toLowerCase().includes(q) ||
+                String(r.shortId || 'N/A').toLowerCase().includes(q) ||
+                String(r.ip || '').toLowerCase().includes(q)
+              ) : true);
           } catch (filterError) {
             errorLog.addError('FILTER_ERROR', `Failed to filter record: ${r.id || 'unknown'}`, filterError);
             return true; // Include problematic records
           }
         });
-        
+
         const totalBadge = document.getElementById('totalBadge');
         if (totalBadge) totalBadge.textContent = `Total: ${filtered.length}`;
-        
+
         tbody.innerHTML = '';
         let idx = 1;
-        const byCourse = { 'PUC / 12th / ISC / CBSE':0, 'Degree / UG':0, 'PG':0 };
+        const byCourse = { 'PUC / 12th / ISC / CBSE': 0, 'Degree / UG': 0, 'PG': 0 };
         const byCollege = {};
-        
+
         filtered.forEach(d => {
           try {
             const tr = document.createElement('tr');
             const created = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString() : '';
             const shortIdDisplay = d.shortId || 'N/A';
-            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username||'')}</td><td>${escapeHtml(d.course||'')}</td><td>${escapeHtml(d.paymentMode||'—')}</td><td>${escapeHtml(d.college||'')}</td><td>${escapeHtml(d.ip||'')}</td><td>${escapeHtml(shortIdDisplay)}</td><td>${created}</td>`;
+            // Create QR code cell
+            const qrCell = document.createElement('td');
+            qrCell.style.textAlign = 'center';
+            qrCell.style.padding = '8px';
+
+            if (d.shortId && d.shortId !== 'N/A') {
+              // Create QR code canvas
+              const qrCanvas = document.createElement('canvas');
+              qrCanvas.width = 60;
+              qrCanvas.height = 60;
+              qrCanvas.style.cursor = 'pointer';
+              qrCanvas.style.border = '1px solid var(--line)';
+              qrCanvas.style.borderRadius = '4px';
+              qrCanvas.title = `Token: ${d.shortId} - Click to enlarge`;
+
+              // Generate QR code
+              generateAdminQRCode(d.shortId, d.username || '', qrCanvas);
+
+              // Add click handler for enlarged view
+              qrCanvas.addEventListener('click', () => showEnlargedQR(d.shortId, d.username || ''));
+
+              qrCell.appendChild(qrCanvas);
+            } else {
+              qrCell.innerHTML = '<span style="color: var(--muted); font-size: 12px;">No Token</span>';
+            }
+
+            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username || '')}</td><td>${escapeHtml(d.phone || '—')}</td><td>${escapeHtml(d.course || '')}</td><td>${escapeHtml(d.paymentMode || '—')}</td><td>${escapeHtml(d.college || '')}</td><td>${escapeHtml(d.ip || '')}</td><td>${escapeHtml(shortIdDisplay)}</td><td></td><td>${created}</td>`;
+
+            // Replace the empty QR cell with our generated one
+            const cells = tr.querySelectorAll('td');
+            tr.replaceChild(qrCell, cells[8]); // Replace the 9th cell (QR Code column)
+
             tbody.appendChild(tr);
-            
+
             const cKey = d.course || 'Other';
             if (byCourse.hasOwnProperty(cKey)) {
               byCourse[cKey]++;
@@ -711,19 +868,19 @@
             errorLog.addError('ROW_ERROR', `Failed to render row for record: ${d.id || 'unknown'}`, rowError);
           }
         });
-        
+
         try {
           renderCharts(byCourse, byCollege);
         } catch (chartError) {
           errorLog.addError('CHART_ERROR', 'Failed to render charts', chartError);
         }
-        
+
         // Save last dataset for re-render on filter change
         window.__lastAllRows = all;
-        
+
         const emptyState = document.getElementById('emptyState');
         if (emptyState) emptyState.style.display = filtered.length ? 'none' : '';
-        
+
       } catch (renderError) {
         errorLog.addError('RENDER_ERROR', 'Failed to render data table', renderError);
       }
@@ -739,18 +896,18 @@
 
     let __courseChart = null, __yearChart = null, __coursePctChart = null;
     let __byDayChart = null;
-    async function renderCharts(byCourse, byCollege){
+    async function renderCharts(byCourse, byCollege) {
       const { Chart } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm');
       const bd = document.getElementById('byDay');
       const cc = document.getElementById('byCourse');
       const cy = document.getElementById('byCollege');
       const cp = document.getElementById('byCoursePct');
       // Color palettes
-      const courseColorMap = { 
-        'PUC / 12th / ISC / CBSE': '#4dabf7', 
-        'Degree / UG': '#845ef7', 
-        'PG': '#ffa94d', 
-        'Other': '#adb5bd' 
+      const courseColorMap = {
+        'PUC / 12th / ISC / CBSE': '#4dabf7',
+        'Degree / UG': '#845ef7',
+        'PG': '#ffa94d',
+        'Other': '#adb5bd'
       };
       const courseLabels = Object.keys(byCourse);
       const courseColors = courseLabels.map(l => courseColorMap[l] || '#74c0fc');
@@ -788,14 +945,14 @@
           for (let i = 13; i >= 0; i--) {
             const d = new Date(now);
             d.setDate(now.getDate() - i);
-            const key = d.toISOString().slice(0,10);
+            const key = d.toISOString().slice(0, 10);
             map.set(key, 0);
           }
           all.forEach(r => {
             const t = r.createdAt?.toDate ? r.createdAt.toDate() : null;
             if (!t) return;
-            const key = t.toISOString().slice(0,10);
-            if (map.has(key)) map.set(key, map.get(key)+1);
+            const key = t.toISOString().slice(0, 10);
+            if (map.has(key)) map.set(key, map.get(key) + 1);
           });
           const labels = Array.from(map.keys());
           const values = Array.from(map.values());
@@ -846,13 +1003,13 @@
       __yearChart = new Chart(cy, yearConfig);
 
       // Percentage by course
-      const totalCount = (byCourse['PUC / 12th / ISC / CBSE']||0) + (byCourse['Degree / UG']||0) + (byCourse['PG']||0);
-      const pctData = totalCount > 0 ? [byCourse['PUC / 12th / ISC / CBSE']||0, byCourse['Degree / UG']||0, byCourse['PG']||0] : [0,0,0];
+      const totalCount = (byCourse['PUC / 12th / ISC / CBSE'] || 0) + (byCourse['Degree / UG'] || 0) + (byCourse['PG'] || 0);
+      const pctData = totalCount > 0 ? [byCourse['PUC / 12th / ISC / CBSE'] || 0, byCourse['Degree / UG'] || 0, byCourse['PG'] || 0] : [0, 0, 0];
       const pctColors = ['#4dabf7', '#845ef7', '#ffa94d'];
       const pctConfig = {
         type: 'pie',
         data: {
-          labels: ['PUC / 12th / ISC / CBSE','Degree / UG','PG'],
+          labels: ['PUC / 12th / ISC / CBSE', 'Degree / UG', 'PG'],
           datasets: [{ data: pctData, backgroundColor: pctColors, borderColor: '#1f1f1f', borderWidth: 2 }]
         },
         options: {
@@ -880,15 +1037,16 @@
     document.getElementById('exportCsv').addEventListener('click', async () => {
       const q = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
       const snap = await getDocs(q);
-      const rows = [['#','username','course','payment','college','ip','Token No','createdAt']];
+      const rows = [['#', 'username', 'phone', 'course', 'payment', 'college', 'ip', 'Token No', 'QR Code Available', 'createdAt']];
       let i = 1;
       snap.forEach(doc => {
         const d = doc.data();
         const created = d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : '';
-        rows.push([i++, d.username||'', d.course||'', d.paymentMode||'', d.college||'', d.ip||'', d.shortId||'N/A', created]);
+        const qrStatus = (d.shortId && d.shortId !== 'N/A') ? 'Yes' : 'No';
+        rows.push([i++, d.username || '', d.phone || '', d.course || '', d.paymentMode || '', d.college || '', d.ip || '', d.shortId || 'N/A', qrStatus, created]);
       });
 
-      const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"','""') + '"').join(',')).join('\n');
+      const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"', '""') + '"').join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -958,7 +1116,7 @@
     document.getElementById('loadDbErrors').addEventListener('click', async () => {
       await errorLog.loadDbErrors();
       const badge = document.getElementById('errorCount');
-      if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length||0));
+      if (badge) badge.textContent = String(errorLog.errors.length + (errorLog.dbErrors?.length || 0));
     });
 
     // Error tab switching
@@ -988,18 +1146,48 @@
       }
     });
 
+    // Logout button
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      if (confirm('Are you sure you want to logout?')) {
+        // Clear persistent login
+        localStorage.setItem('adminPersistentLogin', '0');
+        // Optionally clear remember me as well
+        localStorage.setItem('adminRemember', '0');
+
+        // Hide admin panel and show login form
+        panel.style.display = 'none';
+        loginForm.style.display = '';
+        const mainEl = document.querySelector('main.container.admin-container');
+        if (mainEl) mainEl.classList.remove('is-logged-in');
+
+        // Clear form
+        document.getElementById('adminUser').value = '';
+        document.getElementById('adminPass').value = '';
+        document.getElementById('rememberMe').checked = false;
+        document.getElementById('persistentLogin').checked = false;
+
+        // Stop any active listeners
+        if (unsubscribe) {
+          unsubscribe();
+          unsubscribe = null;
+        }
+      }
+    });
+
+
+
     // Diagnostics runner
     const testModal = document.getElementById('testModal');
     const testSummary = document.getElementById('testSummary');
     const testResults = document.getElementById('testResults');
-    document.getElementById('testClose').addEventListener('click', ()=> testModal.classList.remove('show'));
-    testModal.addEventListener('click', (e)=>{ if (e.target === testModal) testModal.classList.remove('show'); });
+    document.getElementById('testClose').addEventListener('click', () => testModal.classList.remove('show'));
+    testModal.addEventListener('click', (e) => { if (e.target === testModal) testModal.classList.remove('show'); });
     document.getElementById('runTests').addEventListener('click', async () => {
       const tasks = [];
       const add = (name, fn) => tasks.push({ name, fn });
       const log = [];
-      const pass = (name, detail='OK') => log.push({ name, status: 'PASS', detail });
-      const fail = (name, error) => log.push({ name, status: 'FAIL', detail: (error && (error.message||String(error))) || 'Unknown error' });
+      const pass = (name, detail = 'OK') => log.push({ name, status: 'PASS', detail });
+      const fail = (name, error) => log.push({ name, status: 'FAIL', detail: (error && (error.message || String(error))) || 'Unknown error' });
 
       // Prepare tests (read-only and lightweight writes)
       add('Network online', async () => {
@@ -1015,7 +1203,7 @@
           const unsub = onSnapshot(query(collection(db, 'registrations'), limit(1)), () => {
             try { unsub(); pass('Firestore listener (registrations)'); resolve(); } catch (e) { reject(e); }
           }, (err) => reject(err));
-          setTimeout(()=>{ try { unsub(); } catch(_){}; resolve(); }, 1200); // soft-timeout ok
+          setTimeout(() => { try { unsub(); } catch (_) { }; resolve(); }, 1200); // soft-timeout ok
         });
       });
       add('Error logs read (latest)', async () => {
@@ -1025,7 +1213,7 @@
       });
       add('Charts render', async () => {
         try {
-          await renderCharts({ BBA:0, BCA:0, BCOM:0, Other:0 }, { '1':0, '2':0, '3':0, Other:0 });
+          await renderCharts({ BBA: 0, BCA: 0, BCOM: 0, Other: 0 }, { '1': 0, '2': 0, '3': 0, Other: 0 });
           pass('Charts render');
         } catch (e) { throw e; }
       });
@@ -1039,18 +1227,143 @@
       testSummary.textContent = summary;
       testResults.innerHTML = log.map(e => `
         <div class="error-entry">
-          <div class="error-header"><span class="error-type" style="background:${e.status==='PASS'?'#2f9e44':'#d0021b'}">${e.status}</span> <span class="error-time">${e.name}</span></div>
+          <div class="error-header"><span class="error-type" style="background:${e.status === 'PASS' ? '#2f9e44' : '#d0021b'}">${e.status}</span> <span class="error-time">${e.name}</span></div>
           <div class="error-message">${e.detail}</div>
         </div>
       `).join('');
       testModal.classList.add('show');
     });
 
-    function escapeHtml(s){
-      return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    // QR Code generation functions
+    async function generateAdminQRCode(tokenNo, userName, canvas) {
+      try {
+        // Import QRCode library dynamically
+        const QRCode = await import('https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm');
+
+        // Create verification payload
+        const payload = JSON.stringify({
+          type: 'ILLUMINA_ticket',
+          token: tokenNo,
+          name: userName,
+          event: 'ILLUMINA 2K25',
+          date: 'September 25, 2025',
+          venue: 'Lowry Adventist College, Bangalore',
+          ts: Date.now()
+        });
+
+        // Generate QR code on the provided canvas
+        await QRCode.default.toCanvas(canvas, payload, {
+          width: 60,
+          margin: 1,
+          errorCorrectionLevel: 'M',
+          color: {
+            dark: '#7bbf44',  // Green color for QR code
+            light: '#ffffff'  // White background
+          }
+        });
+      } catch (error) {
+        console.error('Failed to generate QR code:', error);
+        // Fallback: draw a simple placeholder
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#666';
+        ctx.font = '10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('QR', canvas.width / 2, canvas.height / 2 + 3);
+      }
+    }
+
+    // Show enlarged QR code in modal
+    function showEnlargedQR(tokenNo, userName) {
+      // Create modal if it doesn't exist
+      let qrModal = document.getElementById('qrModal');
+      if (!qrModal) {
+        qrModal = document.createElement('div');
+        qrModal.id = 'qrModal';
+        qrModal.className = 'modal';
+        qrModal.innerHTML = `
+          <div class="modal-card" style="max-width: 400px; text-align: center;">
+            <h3 style="color: var(--primary); margin-bottom: 16px;">🎫 User QR Code</h3>
+            <div style="background: var(--bg); padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+              <canvas id="enlargedQRCanvas" style="border: 2px solid var(--primary); border-radius: 8px;"></canvas>
+            </div>
+            <div style="margin-bottom: 16px;">
+              <div style="font-weight: 600; color: var(--text);">Token: ${tokenNo}</div>
+              <div style="color: var(--muted); font-size: 14px;">${userName}</div>
+            </div>
+            <button id="closeQRModal" class="btn btn-secondary">Close</button>
+          </div>
+        `;
+        document.body.appendChild(qrModal);
+
+        // Add close functionality
+        qrModal.addEventListener('click', (e) => {
+          if (e.target === qrModal) qrModal.classList.remove('show');
+        });
+        document.getElementById('closeQRModal').addEventListener('click', () => {
+          qrModal.classList.remove('show');
+        });
+      }
+
+      // Update modal content
+      const tokenDiv = qrModal.querySelector('div[style*="font-weight: 600"]');
+      const nameDiv = qrModal.querySelector('div[style*="color: var(--muted)"]');
+      if (tokenDiv) tokenDiv.textContent = `Token: ${tokenNo}`;
+      if (nameDiv) nameDiv.textContent = userName;
+
+      // Generate enlarged QR code
+      const enlargedCanvas = document.getElementById('enlargedQRCanvas');
+      if (enlargedCanvas) {
+        enlargedCanvas.width = 200;
+        enlargedCanvas.height = 200;
+        generateEnlargedQRCode(tokenNo, userName, enlargedCanvas);
+      }
+
+      // Show modal
+      qrModal.classList.add('show');
+    }
+
+    async function generateEnlargedQRCode(tokenNo, userName, canvas) {
+      try {
+        const QRCode = await import('https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm');
+
+        const payload = JSON.stringify({
+          type: 'ILLUMINA_ticket',
+          token: tokenNo,
+          name: userName,
+          event: 'ILLUMINA 2K25',
+          date: 'September 25, 2025',
+          venue: 'Lowry Adventist College, Bangalore',
+          ts: Date.now()
+        });
+
+        await QRCode.default.toCanvas(canvas, payload, {
+          width: 200,
+          margin: 2,
+          errorCorrectionLevel: 'M',
+          color: {
+            dark: '#7bbf44',
+            light: '#ffffff'
+          }
+        });
+      } catch (error) {
+        console.error('Failed to generate enlarged QR code:', error);
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#666';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('QR Code', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('Error', canvas.width / 2, canvas.height / 2 + 20);
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
     }
   </script>
 </body>
+
 </html>
-
-

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Online Payment – illumina</title>
+  <title>Online Payment – ILLUMINA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
@@ -74,6 +74,231 @@
     #checkPaymentBtn:active {
       transform: translateY(0);
     }
+
+    /* WhatsApp Widget Styles */
+    .whatsapp-widget {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1000;
+    }
+
+    .whatsapp-button {
+      width: 60px;
+      height: 60px;
+      background: #25D366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+      transition: all 0.3s ease;
+      animation: pulse 2s infinite;
+    }
+
+    .whatsapp-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4); }
+      50% { box-shadow: 0 4px 12px rgba(37, 211, 102, 0.8), 0 0 0 10px rgba(37, 211, 102, 0.1); }
+      100% { box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4); }
+    }
+
+    .whatsapp-popup {
+      position: absolute;
+      bottom: 80px;
+      left: 0;
+      width: 320px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+
+    .whatsapp-popup.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .whatsapp-header {
+      background: #075E54;
+      color: white;
+      padding: 16px;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .whatsapp-avatar .avatar-circle {
+      width: 40px;
+      height: 40px;
+      background: #25D366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .whatsapp-info {
+      flex: 1;
+    }
+
+    .whatsapp-name {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .whatsapp-status {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .whatsapp-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .whatsapp-messages {
+      padding: 16px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .whatsapp-message {
+      margin-bottom: 12px;
+    }
+
+    .whatsapp-message.received .message-text {
+      background: #f0f0f0;
+      color: #333;
+      padding: 8px 12px;
+      border-radius: 12px 12px 12px 4px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .message-time {
+      font-size: 11px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .whatsapp-actions {
+      padding: 16px;
+      border-top: 1px solid #eee;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .whatsapp-action {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
+
+    .whatsapp-action:hover {
+      background: #e9ecef;
+      transform: translateX(2px);
+    }
+
+    @media (max-width: 768px) {
+      .whatsapp-popup {
+        width: 280px;
+      }
+    }
+
+    /* Full-screen popup styles */
+    .payment-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 11, 11, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .payment-popup-overlay.show {
+      display: flex;
+    }
+
+    .payment-popup {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    .payment-popup h2 {
+      color: var(--primary);
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      font-family: 'Poppins', system-ui, sans-serif;
+    }
+
+    .payment-popup p {
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.5;
+      margin-bottom: 30px;
+    }
+
+    .payment-popup .btn {
+      margin: 10px;
+      min-width: 120px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
   <meta name="description" content="Pay your registration fee online via UPI." />
 </head>
@@ -82,7 +307,7 @@
   <main class="container" role="main"
     style="min-height:100vh; padding: 24px 0; display: flex; align-items: center; justify-content: center;">
     <div style="max-width: 400px; margin: 0 auto; padding: 0 16px; width: 100%;">
-      <h1 class="title" style="text-align: center; margin-bottom: 4px;">Pay ₹200</h1>
+      <h1 class="title" style="text-align: center; margin-bottom: 4px;">Pay ₹250</h1>
       <p class="subtitle" style="text-align: center; margin-top: 0;">Scan the QR code to pay using any UPI app</p>
 
       <section class="form-card"
@@ -130,19 +355,72 @@
     </div>
   </main>
 
+  <!-- WhatsApp Chat Widget -->
+  <div id="whatsappWidget" class="whatsapp-widget">
+    <div class="whatsapp-button" id="whatsappBtn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.516"/>
+      </svg>
+    </div>
+    <div class="whatsapp-popup" id="whatsappPopup">
+      <div class="whatsapp-header">
+        <div class="whatsapp-avatar">
+          <div class="avatar-circle">V</div>
+        </div>
+        <div class="whatsapp-info">
+          <div class="whatsapp-name">Vishal</div>
+          <div class="whatsapp-status">Online • Payment Support</div>
+        </div>
+        <button class="whatsapp-close" id="whatsappClose">×</button>
+      </div>
+      <div class="whatsapp-messages">
+        <div class="whatsapp-message received">
+          <div class="message-text">Need help with payment? 💳<br>I'm here to assist you!</div>
+          <div class="message-time">Just now</div>
+        </div>
+      </div>
+      <div class="whatsapp-actions">
+        <button class="whatsapp-action" data-message="Hi! I'm having trouble with UPI payment for ILLUMINA">
+          🔄 UPI Payment Issue
+        </button>
+        <button class="whatsapp-action" data-message="Hello! My payment was successful but I need confirmation for ILLUMINA">
+          ✅ Payment Confirmation
+        </button>
+        <button class="whatsapp-action" data-message="Hi! I need help with QR code scanning for ILLUMINA payment">
+          📱 QR Code Help
+        </button>
+        <button class="whatsapp-action" data-message="Hello! I need general payment support for ILLUMINA">
+          💬 General Payment Help
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Page Loader Overlay -->
   <div id="pageLoader" class="page-loader" aria-live="polite" aria-busy="false">
     <div class="spinner-standalone" aria-hidden="true"></div>
     <div id="loaderText" class="loader-text">Opening your UPI app…</div>
   </div>
 
+  <!-- Payment Status Popup -->
+  <div id="paymentPopup" class="payment-popup-overlay">
+    <div class="payment-popup">
+      <h2>Check Payment Status</h2>
+      <p>Have you completed the payment? Please confirm your payment status to proceed with registration.</p>
+      <div>
+        <button id="paymentCompletedBtn" class="btn btn-primary">Yes, Payment Done</button>
+        <button id="paymentPendingBtn" class="btn btn-secondary">Not Yet</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Secure UPI payment configuration
     const UPI_CONFIG = {
       id: 'madhavi@paytm',
-      amount: '200',
+      amount: '250',
       merchantName: 'MADHAVI',
-      transactionNote: 'illumina Registration Fee',
+      transactionNote: 'ILLUMINA Registration Fee',
       whatsappNumber: '7349321463'
     };
 
@@ -227,7 +505,7 @@
 
       // Get user context for transaction note
       const userContext = getUserContext();
-      let transactionNote = `Token ${userContext?.token || 'N/A'} Illumina Lowry College`;
+      let transactionNote = `Token ${userContext?.token || 'N/A'} ILLUMINA Lowry College`;
 
       const params = new URLSearchParams({
         pa: '8050816937@ibl',
@@ -260,7 +538,7 @@
       let message = 'hello';
 
       if (userContext) {
-        message = `Hello! I have completed payment for illumina registration.
+        message = `Hello! I have completed payment for ILLUMINA registration.
         
 Details:
 • Name: ${userContext.name}
@@ -424,47 +702,75 @@ Please confirm my payment status.`;
       }
     }
 
+    // Show payment status popup
+    function showPaymentStatusPopup() {
+      const popup = document.getElementById('paymentPopup');
+      if (popup) {
+        popup.classList.add('show');
+      }
+    }
+
+    // Hide payment status popup
+    function hidePaymentStatusPopup() {
+      const popup = document.getElementById('paymentPopup');
+      if (popup) {
+        popup.classList.remove('show');
+      }
+    }
+
     // Handle payment status verification via WhatsApp
     function verifyPaymentStatus() {
       try {
-        showLoader('Redirecting to WhatsApp for verification...');
-
-        // Get user context for personalized message
-        const userContext = getUserContext();
-        const whatsappLink = buildWhatsAppLink(userContext);
-        console.log('Redirecting to WhatsApp for payment verification');
-
-        // Track verification attempt
-        trackPaymentEvent('verification_initiated', {
-          transactionId,
-          userToken: userContext?.token,
-          timestamp: new Date().toISOString()
-        });
-
-        // Open WhatsApp in new tab/window
-        const whatsappWindow = window.open(whatsappLink, '_blank');
-
-        setTimeout(() => {
-          hideLoader();
-
-          // Check if WhatsApp opened successfully
-          if (whatsappWindow && !whatsappWindow.closed) {
-            showVerificationMessage();
-            updateButtonState(PaymentState.VERIFIED);
-          } else {
-            // Fallback: direct navigation
-            window.location.href = whatsappLink;
-          }
-        }, 1000);
+        // Show popup instead of direct WhatsApp redirect
+        showPaymentStatusPopup();
 
       } catch (error) {
-        console.error('WhatsApp verification failed:', error);
+        console.error('Payment verification failed:', error);
         trackPaymentEvent('verification_failed', { error: error.message });
         showLoader('Verification failed. Please contact support.', true);
         setTimeout(() => {
           hideLoader();
         }, 2000);
       }
+    }
+
+    // Handle payment completed confirmation
+    function handlePaymentCompleted() {
+      hidePaymentStatusPopup();
+      showLoader('Redirecting to WhatsApp for verification...');
+
+      // Get user context for personalized message
+      const userContext = getUserContext();
+      const whatsappLink = buildWhatsAppLink(userContext);
+      console.log('Redirecting to WhatsApp for payment verification');
+
+      // Track verification attempt
+      trackPaymentEvent('verification_initiated', {
+        transactionId,
+        userToken: userContext?.token,
+        timestamp: new Date().toISOString()
+      });
+
+      // Open WhatsApp in new tab/window
+      setTimeout(() => {
+        const whatsappWindow = window.open(whatsappLink, '_blank');
+        hideLoader();
+
+        // Check if WhatsApp opened successfully
+        if (whatsappWindow && !whatsappWindow.closed) {
+          showVerificationMessage();
+          updateButtonState(PaymentState.VERIFIED);
+        } else {
+          // Fallback: direct navigation
+          window.location.href = whatsappLink;
+        }
+      }, 1000);
+    }
+
+    // Handle payment pending
+    function handlePaymentPending() {
+      hidePaymentStatusPopup();
+      updateButtonState(PaymentState.INITIAL);
     }
 
     // Show payment status message
@@ -641,6 +947,31 @@ Please confirm my payment status.`;
       }, 1500); // Hide after 1.5 seconds
     }
 
+    // Add popup event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // Payment popup button handlers
+      const paymentCompletedBtn = document.getElementById('paymentCompletedBtn');
+      const paymentPendingBtn = document.getElementById('paymentPendingBtn');
+
+      if (paymentCompletedBtn) {
+        paymentCompletedBtn.addEventListener('click', handlePaymentCompleted);
+      }
+
+      if (paymentPendingBtn) {
+        paymentPendingBtn.addEventListener('click', handlePaymentPending);
+      }
+
+      // Close popup when clicking outside
+      const paymentPopup = document.getElementById('paymentPopup');
+      if (paymentPopup) {
+        paymentPopup.addEventListener('click', (e) => {
+          if (e.target === paymentPopup) {
+            hidePaymentStatusPopup();
+          }
+        });
+      }
+    });
+
     // Initialize payment state on page load
     document.addEventListener('DOMContentLoaded', () => {
       // Show loading animation when page loads
@@ -744,7 +1075,7 @@ Please confirm my payment status.`;
     function contactSupportWithError(errorId, errorMessage) {
       const userContext = getUserContext();
 
-      let supportMessage = `Hello! I'm experiencing a payment issue on illumina registration.
+      let supportMessage = `Hello! I'm experiencing a payment issue on ILLUMINA registration.
 
 Error Details:
 • Error ID: ${errorId}
@@ -936,6 +1267,42 @@ Please help me resolve this issue.`;
         });
       }
     });
+
+    // WhatsApp Widget Functionality
+    (function() {
+      const whatsappBtn = document.getElementById('whatsappBtn');
+      const whatsappPopup = document.getElementById('whatsappPopup');
+      const whatsappClose = document.getElementById('whatsappClose');
+      const whatsappActions = document.querySelectorAll('.whatsapp-action');
+      const whatsappNumber = '7349321463'; // Support number
+
+      // Toggle popup
+      whatsappBtn.addEventListener('click', () => {
+        whatsappPopup.classList.toggle('show');
+      });
+
+      // Close popup
+      whatsappClose.addEventListener('click', () => {
+        whatsappPopup.classList.remove('show');
+      });
+
+      // Close popup when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.whatsapp-widget')) {
+          whatsappPopup.classList.remove('show');
+        }
+      });
+
+      // Handle action buttons
+      whatsappActions.forEach(action => {
+        action.addEventListener('click', () => {
+          const message = action.getAttribute('data-message');
+          const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+          window.open(whatsappUrl, '_blank');
+          whatsappPopup.classList.remove('show');
+        });
+      });
+    })();
   </script>
 </body>
 

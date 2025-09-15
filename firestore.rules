@@ -19,10 +19,10 @@ service cloud.firestore {
         request.resource.data.ip is string &&
         request.resource.data.keys().hasOnly(['username','course','college','phone','ip','shortId','createdAt']);
 
-      /* allow updating payment fields only */
+      /* allow updating payment and RSVP fields only */
       allow update: if
-        request.resource.data.diff(resource.data).changedKeys().hasOnly(['paymentMode','paymentAt']) &&
-        request.resource.data.paymentMode in ['onspot','online'];
+        request.resource.data.diff(resource.data).changedKeys().hasOnly(['paymentMode','paymentAt','rsvpDownloaded','rsvpDownloadedAt','adminGenerated','paymentUpdatedAt','paymentUpdatedBy']) &&
+        (request.resource.data.paymentMode == null || request.resource.data.paymentMode in ['onspot','online']);
 
       /* prevent deletes from the public */
       allow delete: if false;
@@ -43,6 +43,17 @@ service cloud.firestore {
                      request.resource.data.username is string &&
                      request.resource.data.mode in ['onspot', 'online'] &&
                      request.resource.data.keys().hasOnly(['tokenNo','username','mode','createdAt']);
+      allow read: if true; // for admin panel access
+      allow update, delete: if false;
+    }
+
+    /* RSVP Downloads: allow create from success page and admin panel */
+    match /rsvpDownloads/{docId} {
+      allow create: if request.resource.data.tokenNo is string &&
+                     request.resource.data.username is string &&
+                     request.resource.data.paymentMode in ['onspot', 'online'] &&
+                     request.resource.data.downloadType in ['user_download', 'admin_generated'] &&
+                     request.resource.data.keys().hasOnly(['tokenNo','username','paymentMode','downloadedAt','downloadType']);
       allow read: if true; // for admin panel access
       allow update, delete: if false;
     }

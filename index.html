@@ -8,6 +8,165 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=5">
+  <style>
+    /* WhatsApp Widget Styles */
+    .whatsapp-widget {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1000;
+    }
+
+    .whatsapp-button {
+      width: 60px;
+      height: 60px;
+      background: #25D366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+      transition: all 0.3s ease;
+      animation: pulse 2s infinite;
+    }
+
+    .whatsapp-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4); }
+      50% { box-shadow: 0 4px 12px rgba(37, 211, 102, 0.8), 0 0 0 10px rgba(37, 211, 102, 0.1); }
+      100% { box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4); }
+    }
+
+    .whatsapp-popup {
+      position: absolute;
+      bottom: 80px;
+      left: 0;
+      width: 320px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+
+    .whatsapp-popup.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .whatsapp-header {
+      background: #075E54;
+      color: white;
+      padding: 16px;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .whatsapp-avatar .avatar-circle {
+      width: 40px;
+      height: 40px;
+      background: #25D366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .whatsapp-info {
+      flex: 1;
+    }
+
+    .whatsapp-name {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .whatsapp-status {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .whatsapp-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .whatsapp-messages {
+      padding: 16px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .whatsapp-message {
+      margin-bottom: 12px;
+    }
+
+    .whatsapp-message.received .message-text {
+      background: #f0f0f0;
+      color: #333;
+      padding: 8px 12px;
+      border-radius: 12px 12px 12px 4px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .message-time {
+      font-size: 11px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .whatsapp-actions {
+      padding: 16px;
+      border-top: 1px solid #eee;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .whatsapp-action {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
+
+    .whatsapp-action:hover {
+      background: #e9ecef;
+      transform: translateX(2px);
+    }
+
+    @media (max-width: 768px) {
+      .whatsapp-popup {
+        width: 280px;
+      }
+    }
+  </style>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y0TXQST3MG"></script>
   <script>
@@ -36,7 +195,7 @@
   </script>
   <meta name="description" content="Register for ILLUMINA 2K25 - Inter College Cultural Festival at Lowry Adventist College on 25 Sep 2025. 16 exciting events including technical, cultural, literary and creative competitions.">
   <!-- Open Graph / WhatsApp / Facebook -->
-  <meta property="og:site_name" content="illumina">
+  <meta property="og:site_name" content="ILLUMINA">
   <meta property="og:type" content="website">
   <meta property="og:title" content="ILLUMINA 2K25 - Inter College Cultural Festival">
   <meta property="og:description" content="Join ILLUMINA 2K25 at Lowry Adventist College on 25 Sep 2025. 16 exciting events including Product Launch, Coding, Dance, Music, Photography, and more!">
@@ -46,22 +205,22 @@
   <meta property="og:image:height" content="630">
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Register for illumina">
-  <meta name="twitter:description" content="Register for illumina at Lowry Adventist College on 25 Sep 2025.">
+  <meta name="twitter:title" content="Register for ILLUMINA">
+  <meta name="twitter:description" content="Register for ILLUMINA at Lowry Adventist College on 25 Sep 2025.">
   <meta name="twitter:image" content="https://lac-chess.netlify.app/images/og-image.jpg">
 </head>
 <body>
   <div id="siteBanner" class="site-banner" role="region" aria-label="Announcement" style="display:none">
-    <span><strong>New trial is out</strong> — follow updates at</span>
-    <a href="https://www.instagram.com/lac_cultural_department/" target="_blank" rel="noopener">@lac_cultural_department</a>
+    <span><strong>Check ILLUMINA brochure</strong> — download now</span>
+    <a href="ilumina 25 rules.pdf" target="_blank" rel="noopener" download>Download PDF</a>
     <button id="closeBanner" class="banner-close" aria-label="Close announcement">×</button>
   </div>
   
   <main class="container" role="main">
     <div class="chess-logo">
-      <a href="index.html"><img src="images/lowrylogo.png" alt="illumina Logo"></a>
+      <a href="index.html"><img src="images/lowrylogo.png" alt="ILLUMINA Logo"></a>
     </div>
-    <h1 class="title">Illumina</h1>
+    <h1 class="title">ILLUMINA 2K25</h1>
     <p class="subtitle">@ Lowry Adventist College</p>
 
     <div class="countdown" aria-live="polite">
@@ -75,8 +234,8 @@
 
     <a id="registerBtn" class="btn btn-primary" href="register.html" role="button">Register Now</a>
 
-    <div class="social-cta"><a href="https://maps.app.goo.gl/2jXy52wZcV9ZxGpP9?g_st=aw" target="_blank" rel="noopener">College Address</a></div>
-    <div class="social-cta"><a class="login-link" href="rules.html">View Rules & Coordinators</a></div>
+    <div class="social-cta"><a href="https://www.google.com/maps/place/Lowry+Adventist+College/@12.9995672,77.6758179,808m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3bae111664e6ea83:0x9e648c3a0ca0c194!8m2!3d12.999562!4d77.6783928!16s%2Fg%2F1tdp3h08?hl=en&entry=ttu&g_ep=EgoyMDI1MDkxMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">College Address</a></div>
+    <a class="btn btn-secondary" href="rules.html" style="margin-top: 10px;">View Rules & Coordinators</a>
     
     <section class="events" aria-labelledby="events-title">
       <h2 id="events-title" class="events-title">Events</h2>
@@ -197,11 +356,11 @@
               </div> -->
             </div>
           </div>
-          <a href="https://maps.app.goo.gl/2jXy52wZcV9ZxGpP9?g_st=aw" target="_blank" rel="noopener" class="btn btn-secondary">Get Directions</a>
+          <a href="https://www.google.com/maps/place/Lowry+Adventist+College/@12.9995672,77.6758179,808m/data=!3m2!1e3!4b1!4m6!3m5!1s0x3bae111664e6ea83:0x9e648c3a0ca0c194!8m2!3d12.999562!4d77.6783928!16s%2Fg%2F1tdp3h08?hl=en&entry=ttu&g_ep=EgoyMDI1MDkxMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener" class="btn btn-secondary">Get Directions</a>
         </div>
         <div class="map-container">
           <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3886.234!2d77.6946!3d12.9716!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDU4JzE3LjgiTiA3N8KwNDEnNDAuNiJF!5e0!3m2!1sen!2sin!4v1635000000000!5m2!1sen!2sin"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3886.234!2d77.6758179!3d12.9995672!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae111664e6ea83:0x9e648c3a0ca0c194!2sLowry+Adventist+College!5e0!3m2!1sen!2sin!4v1635000000000!5m2!1sen!2sin"
             width="100%" 
             height="300" 
             style="border:0; border-radius: 12px;" 
@@ -215,10 +374,51 @@
     </section>
   </main>
 
+  <!-- WhatsApp Chat Widget -->
+  <div id="whatsappWidget" class="whatsapp-widget">
+    <div class="whatsapp-button" id="whatsappBtn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.516"/>
+      </svg>
+    </div>
+    <div class="whatsapp-popup" id="whatsappPopup">
+      <div class="whatsapp-header">
+        <div class="whatsapp-avatar">
+          <div class="avatar-circle">V</div>
+        </div>
+        <div class="whatsapp-info">
+          <div class="whatsapp-name">Vishal</div>
+          <div class="whatsapp-status">Online • Support Team</div>
+        </div>
+        <button class="whatsapp-close" id="whatsappClose">×</button>
+      </div>
+      <div class="whatsapp-messages">
+        <div class="whatsapp-message received">
+          <div class="message-text">Hi! I'm Vishal 👋<br>How can I help you with ILLUMINA?</div>
+          <div class="message-time">Just now</div>
+        </div>
+      </div>
+      <div class="whatsapp-actions">
+        <button class="whatsapp-action" data-message="Hello! I need help regarding ILLUMINA registration">
+          📝 Registration Help
+        </button>
+        <button class="whatsapp-action" data-message="Hi! I have questions about ILLUMINA events">
+          🎭 Event Information
+        </button>
+        <button class="whatsapp-action" data-message="Hello! I need assistance with payment for ILLUMINA">
+          💳 Payment Support
+        </button>
+        <button class="whatsapp-action" data-message="Hi! I need general help regarding ILLUMINA">
+          ❓ General Help
+        </button>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer" role="contentinfo">
     <div class="footer-content">
       <div class="footer-main">
-        <h3>illumina 2025</h3>
+        <h3>ILLUMINA 2K25</h3>
         <p>Inter-College Cultural Festival • Lowry Adventist College</p>
       </div>
       <div class="footer-links">
@@ -284,6 +484,55 @@
       setInterval(update, 1000);
       
       // Registration button now directly links to register.html
+    })();
+
+    // WhatsApp Widget Functionality
+    (function() {
+      const whatsappBtn = document.getElementById('whatsappBtn');
+      const whatsappPopup = document.getElementById('whatsappPopup');
+      const whatsappClose = document.getElementById('whatsappClose');
+      const whatsappActions = document.querySelectorAll('.whatsapp-action');
+      const whatsappNumber = '7349321463'; // Support number
+
+      // Toggle popup
+      whatsappBtn.addEventListener('click', () => {
+        whatsappPopup.classList.toggle('show');
+      });
+
+      // Close popup
+      whatsappClose.addEventListener('click', () => {
+        whatsappPopup.classList.remove('show');
+      });
+
+      // Close popup when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.whatsapp-widget')) {
+          whatsappPopup.classList.remove('show');
+        }
+      });
+
+      // Handle action buttons
+      whatsappActions.forEach(action => {
+        action.addEventListener('click', () => {
+          const message = action.getAttribute('data-message');
+          const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+          window.open(whatsappUrl, '_blank');
+          whatsappPopup.classList.remove('show');
+        });
+      });
+
+      // Auto-show popup after 5 seconds (first visit)
+      if (!localStorage.getItem('whatsappShown')) {
+        setTimeout(() => {
+          whatsappPopup.classList.add('show');
+          localStorage.setItem('whatsappShown', '1');
+          
+          // Auto-hide after 10 seconds
+          setTimeout(() => {
+            whatsappPopup.classList.remove('show');
+          }, 10000);
+        }, 5000);
+      }
     })();
   </script>
 
