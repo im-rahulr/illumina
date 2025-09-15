@@ -103,9 +103,17 @@
     }
 
     @keyframes pulse {
-      0% { box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4); }
-      50% { box-shadow: 0 4px 12px rgba(37, 211, 102, 0.8), 0 0 0 10px rgba(37, 211, 102, 0.1); }
-      100% { box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4); }
+      0% {
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.8), 0 0 0 10px rgba(37, 211, 102, 0.1);
+      }
+
+      100% {
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+      }
     }
 
     .whatsapp-popup {
@@ -285,16 +293,22 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
 
     @keyframes slideUp {
-      from { 
+      from {
         opacity: 0;
         transform: translateY(30px);
       }
-      to { 
+
+      to {
         opacity: 1;
         transform: translateY(0);
       }
@@ -359,7 +373,8 @@
   <div id="whatsappWidget" class="whatsapp-widget">
     <div class="whatsapp-button" id="whatsappBtn">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.516"/>
+        <path
+          d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.516" />
       </svg>
     </div>
     <div class="whatsapp-popup" id="whatsappPopup">
@@ -383,7 +398,8 @@
         <button class="whatsapp-action" data-message="Hi! I'm having trouble with UPI payment for ILLUMINA">
           🔄 UPI Payment Issue
         </button>
-        <button class="whatsapp-action" data-message="Hello! My payment was successful but I need confirmation for ILLUMINA">
+        <button class="whatsapp-action"
+          data-message="Hello! My payment was successful but I need confirmation for ILLUMINA">
           ✅ Payment Confirmation
         </button>
         <button class="whatsapp-action" data-message="Hi! I need help with QR code scanning for ILLUMINA payment">
@@ -406,9 +422,12 @@
   <div id="paymentPopup" class="payment-popup-overlay">
     <div class="payment-popup">
       <h2>Payment Confirmation</h2>
-      <p>Please scan the QR code to make payment. After completing the payment, click "Check Payment Status" for manual verification.</p>
-      <div style="margin: 16px 0; padding: 12px; background: rgba(255, 193, 7, 0.1); border: 1px solid #ffc107; border-radius: 8px; font-size: 14px; color: #856404;">
-        <strong>Note:</strong> Payment confirmation will be done manually by our team. Please wait for verification after payment.
+      <p>Please scan the QR code to make payment. After completing the payment, click "Check Payment Status" for manual
+        verification.</p>
+      <div
+        style="margin: 16px 0; padding: 12px; background: rgba(255, 193, 7, 0.1); border: 1px solid #ffc107; border-radius: 8px; font-size: 14px; color: #856404;">
+        <strong>Note:</strong> Payment confirmation will be done manually by our team. Please wait for verification
+        after payment.
       </div>
       <div>
         <button id="paymentCompletedBtn" class="btn btn-primary">Check Payment Status</button>
@@ -512,17 +531,19 @@
 
       const params = new URLSearchParams({
         pa: '9739904620@ybl',
-        pn: 'MADHAVI  R',
+        pn: 'MADHAVI R',
         mc: '0000',
         mode: '02',
         purpose: '00',
         am: UPI_CONFIG.amount,
         cu: 'INR',
         tn: transactionNote,
-        tr: transactionId // Transaction reference
+        tr: transactionId
       });
 
-      return `upi://pay?${params.toString()}`;
+      const upiLink = `upi://pay?${params.toString()}`;
+      console.log('Generated UPI link:', upiLink);
+      return upiLink;
     }
 
     // Get user context from session storage
@@ -661,8 +682,40 @@ Please confirm my payment status.`;
 
         // Add security delay to prevent rapid-fire attempts
         setTimeout(() => {
-          // Attempt to open UPI app
-          window.location.href = upiLink;
+          console.log('Opening UPI link:', upiLink);
+
+          // Try multiple methods to open UPI app
+          let upiOpened = false;
+
+          try {
+            // Method 1: Direct window.location (most reliable)
+            window.location.href = upiLink;
+            upiOpened = true;
+          } catch (e) {
+            console.warn('Method 1 failed:', e);
+          }
+
+          if (!upiOpened) {
+            try {
+              // Method 2: Create and click a link
+              const tempLink = document.createElement('a');
+              tempLink.href = upiLink;
+              tempLink.style.display = 'none';
+              document.body.appendChild(tempLink);
+              tempLink.click();
+              document.body.removeChild(tempLink);
+              upiOpened = true;
+            } catch (e) {
+              console.warn('Method 2 failed:', e);
+            }
+          }
+
+          if (!upiOpened) {
+            // Method 3: Show manual instructions
+            hideLoader();
+            showManualUpiInstructions(upiLink);
+            return;
+          }
 
           // Track UPI app opening
           trackPaymentEvent('upi_app_opened', {
@@ -698,6 +751,63 @@ Please confirm my payment status.`;
           updateButtonState(PaymentState.INITIAL);
         }, 2000);
       }
+    }
+
+    // Show manual UPI instructions if automatic opening fails
+    function showManualUpiInstructions(upiLink) {
+      const instructionsDiv = document.createElement('div');
+      instructionsDiv.className = 'manual-upi-instructions';
+      instructionsDiv.style.cssText = `
+        background: rgba(123, 191, 68, 0.1);
+        border: 1px solid var(--primary);
+        border-radius: 8px;
+        padding: 20px;
+        margin: 16px 0;
+        text-align: center;
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.5;
+      `;
+
+      instructionsDiv.innerHTML = `
+        <div style="color: var(--primary); font-weight: 600; margin-bottom: 12px;">
+          📱 Manual UPI Payment
+        </div>
+        <div style="margin-bottom: 16px;">
+          If your UPI app didn't open automatically, please follow these steps:
+        </div>
+        <div style="text-align: left; margin-bottom: 16px;">
+          <strong>Option 1:</strong> Copy the UPI ID below and pay manually<br>
+          <div style="background: var(--surface); padding: 8px; border-radius: 4px; margin: 8px 0; font-family: monospace;">
+            9739904620@ybl
+          </div>
+          <strong>Amount:</strong> ₹${UPI_CONFIG.amount}<br>
+          <strong>Note:</strong> Token ${getUserContext()?.token || 'N/A'} ILLUMINA
+        </div>
+        <div style="margin-bottom: 16px;">
+          <strong>Option 2:</strong> Try opening UPI link again
+        </div>
+        <button id="retryUpiBtn" class="btn btn-primary" style="margin: 8px;">
+          🔄 Try UPI Link Again
+        </button>
+        <button id="manualPayBtn" class="btn btn-secondary" style="margin: 8px;">
+          💳 I'll Pay Manually
+        </button>
+      `;
+
+      // Insert after the form card
+      const formCard = document.querySelector('.form-card');
+      formCard.parentNode.insertBefore(instructionsDiv, formCard.nextSibling);
+
+      // Add event listeners
+      document.getElementById('retryUpiBtn').addEventListener('click', () => {
+        window.location.href = upiLink;
+      });
+
+      document.getElementById('manualPayBtn').addEventListener('click', () => {
+        instructionsDiv.remove();
+        showPaymentStatusPopup();
+      });
     }
 
     // Show payment status popup
@@ -740,12 +850,12 @@ Please confirm my payment status.`;
     // Handle payment completed confirmation
     function handlePaymentCompleted() {
       hidePaymentStatusPopup();
-      
+
       // Redirect to WhatsApp for verification
       const userContext = getUserContext();
       const whatsappLink = buildWhatsAppLink(userContext);
       window.location.href = whatsappLink;
-      
+
       trackPaymentEvent('whatsapp_verification_initiated', {
         transactionId,
         timestamp: new Date().toISOString()
@@ -1252,7 +1362,7 @@ Please help me resolve this issue.`;
     });
 
     // WhatsApp Widget Functionality
-    (function() {
+    (function () {
       const whatsappBtn = document.getElementById('whatsappBtn');
       const whatsappPopup = document.getElementById('whatsappPopup');
       const whatsappClose = document.getElementById('whatsappClose');

@@ -854,13 +854,18 @@
           // Prevent default navigation so we can save the selection first
           e.preventDefault();
           
-          // Show loading animation immediately
+          // Show loading animation immediately with better messaging
           showLoader('Preparing payment page...');
           
-          await reveal('online');
+          // Update button state to show it's loading
+          btnOnline.style.opacity = '0.7';
+          btnOnline.style.pointerEvents = 'none';
+          btnOnline.innerHTML = '⏳ Loading...';
           
-          // Store payment context for secure payment flow
           try {
+            await reveal('online');
+            
+            // Store payment context for secure payment flow
             sessionStorage.setItem('payment_user_context', JSON.stringify({
               token: token,
               name: name,
@@ -868,14 +873,26 @@
               amount: '250',
               purpose: 'ILLUMINA Registration Fee'
             }));
+            
+            // Update loader message
+            if (loaderText) loaderText.textContent = 'Redirecting to payment...';
+            
+            // Add a delay to show the loading animation
+            setTimeout(() => {
+              window.location.href = 'payment.html';
+            }, 1200);
+            
           } catch (error) {
-            console.warn('Unable to store payment context:', error);
+            console.error('Error preparing payment:', error);
+            hideLoader();
+            
+            // Reset button state
+            btnOnline.style.opacity = '';
+            btnOnline.style.pointerEvents = '';
+            btnOnline.innerHTML = 'Pay Online Now';
+            
+            alert('Error preparing payment. Please try again.');
           }
-          
-          // Add a small delay to show the loading animation
-          setTimeout(() => {
-            window.location.href = 'payment.html';
-          }, 800);
         });
       }
 
