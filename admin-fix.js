@@ -77,14 +77,14 @@ async function renderCharts(byCourse, byYear) {
       options: chartOptions
     });
     
-    // By Year Chart
+    // By College Chart (replacing year chart)
     __yearChart = new Chart(by, {
       type: 'doughnut',
       data: {
-        labels: Object.keys(byYear),
+        labels: ['Sample College 1', 'Sample College 2', 'Others'],
         datasets: [{
-          data: Object.values(byYear),
-          backgroundColor: ['#7bbf44', '#6aac37', '#5a9b2a', '#4a8b1d']
+          data: [10, 8, 5],
+          backgroundColor: ['#7bbf44', '#6aac37', '#5a9b2a']
         }]
       },
       options: {
@@ -130,14 +130,13 @@ async function renderCharts(byCourse, byYear) {
 
 // Export CSV functionality
 function exportToCsv(data) {
-  const headers = ['#', 'Username', 'Course', 'Year', 'Payment', 'College', 'IP', 'Token No', 'Created'];
+  const headers = ['#', 'Username', 'Course', 'Payment', 'College', 'IP', 'Token No', 'Created'];
   const csvContent = [
     headers.join(','),
     ...data.map((row, index) => [
       index + 1,
       `"${(row.username || '').replace(/"/g, '""')}"`,
       row.course || '',
-      row.year || '',
       row.paymentMode || '',
       `"${(row.college || '').replace(/"/g, '""')}"`,
       row.ip || '',
@@ -204,7 +203,7 @@ async function runDiagnostics() {
   // Chart rendering test
   add('Charts Render', async () => {
     try {
-      await renderCharts({ BBA:0, BCA:0, BCOM:0, Other:0 }, { '1':0, '2':0, '3':0, Other:0 });
+      await renderCharts({ PUC:0, Engineering:0, Other:0 }, { 'Sample':0 });
       pass('Charts Render');
     } catch (e) {
       throw e;
@@ -213,7 +212,7 @@ async function runDiagnostics() {
   
   // DOM elements test
   add('DOM Elements', () => {
-    const required = ['rows', 'totalBadge', 'filterCourse', 'filterYear', 'searchBox'];
+    const required = ['rows', 'totalBadge', 'filterCourse', 'searchBox'];
     const missing = required.filter(id => !document.getElementById(id));
     if (missing.length > 0) {
       throw new Error(`Missing elements: ${missing.join(', ')}`);
