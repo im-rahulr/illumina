@@ -671,18 +671,13 @@ Please confirm my payment status.`;
           });
         }, 500);
 
-        // Handle return from UPI app
+        // Handle return from UPI app - show popup instead of message
         setTimeout(() => {
           hideLoader();
           updateButtonState(PaymentState.AWAITING_VERIFICATION);
 
-          // Show check payment button
-          if (checkPaymentBtn) {
-            checkPaymentBtn.style.display = 'block';
-          }
-
-          // Show success message with next steps
-          showPaymentStatusMessage();
+          // Show payment status popup when user returns
+          showPaymentStatusPopup();
 
           // Track return from UPI app
           trackPaymentEvent('returned_from_upi', {
@@ -745,7 +740,16 @@ Please confirm my payment status.`;
     // Handle payment completed confirmation
     function handlePaymentCompleted() {
       hidePaymentStatusPopup();
-      initiateUpiPayment();
+      
+      // Redirect to WhatsApp for verification
+      const userContext = getUserContext();
+      const whatsappLink = buildWhatsAppLink(userContext);
+      window.location.href = whatsappLink;
+      
+      trackPaymentEvent('whatsapp_verification_initiated', {
+        transactionId,
+        timestamp: new Date().toISOString()
+      });
     }
 
     // Handle payment pending
@@ -817,10 +821,8 @@ Please confirm my payment status.`;
           if (currentState === PaymentState.UPI_OPENED) {
             hideLoader();
             updateButtonState(PaymentState.AWAITING_VERIFICATION);
-            if (checkPaymentBtn) {
-              checkPaymentBtn.style.display = 'block';
-            }
-            showPaymentStatusMessage();
+            // Show popup when user returns from UPI app
+            showPaymentStatusPopup();
           }
         }, 500);
       }
@@ -834,10 +836,8 @@ Please confirm my payment status.`;
           if (currentState === PaymentState.UPI_OPENED) {
             hideLoader();
             updateButtonState(PaymentState.AWAITING_VERIFICATION);
-            if (checkPaymentBtn) {
-              checkPaymentBtn.style.display = 'block';
-            }
-            showPaymentStatusMessage();
+            // Show popup when user returns from UPI app
+            showPaymentStatusPopup();
           }
         }, 1000);
       }
@@ -856,8 +856,8 @@ Please confirm my payment status.`;
 
         switch (currentState) {
           case PaymentState.INITIAL:
-            // Show payment popup immediately instead of UPI flow
-            showPaymentStatusPopup();
+            // First redirect to UPI app directly
+            initiateUpiPayment();
             break;
 
           case PaymentState.AWAITING_VERIFICATION:

@@ -373,7 +373,7 @@
   <script src="admin-fix.js"></script>
   <script type="module">
     import { db } from './firebase-config.js';
-    import { collection, getDocs, query, orderBy, onSnapshot, limit } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import { collection, getDocs, query, orderBy, onSnapshot, limit, where } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
     // db is imported from firebase-config.js
 
@@ -850,7 +850,10 @@
               }).catch((error) => {
                 console.error('Error displaying RSVP status for token', d.shortId, ':', error);
                 rsvpCell.innerHTML = `
-                  <span style="color: #dc3545; font-size: 12px;">❌ Error</span>
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                    <span style="color: #dc3545; font-size: 12px;">❌ Error</span>
+                    <span style="color: var(--muted); font-size: 9px;" title="${error.message}">${error.message.substring(0, 20)}...</span>
+                  </div>
                 `;
               });
             } else {
@@ -1482,6 +1485,12 @@
         const cleanToken = String(tokenNo).trim();
         console.log('Checking RSVP status for token:', cleanToken, '(type:', typeof cleanToken, ')');
         
+        // Check if db is available
+        if (!db) {
+          console.error('Database not initialized');
+          throw new Error('Database not available');
+        }
+        
         const q = query(collection(db, 'rsvpDownloads'), where('tokenNo', '==', cleanToken));
         const snapshot = await getDocs(q);
         
@@ -1523,6 +1532,7 @@
         return { downloaded: false };
       } catch (error) {
         console.error('Error checking RSVP status for token', tokenNo, ':', error);
+        console.error('Error details:', error.message, error.stack);
         throw error;
       }
     }
@@ -1536,6 +1546,33 @@
         return result;
       } catch (error) {
         console.error('Test error:', error);
+        return { error: error.message };
+      }
+    };
+
+    // Test function specifically for token 286
+    window.testToken286 = async function() {
+      console.log('=== Testing Token 286 Specifically ===');
+      try {
+        // First, let's check if we can query the collection at all
+        console.log('Testing basic collection access...');
+        const allDownloads = await getDocs(collection(db, 'rsvpDownloads'));
+        console.log('Total RSVP downloads in collection:', allDownloads.size);
+        
+        allDownloads.forEach(doc => {
+          const data = doc.data();
+          console.log('Download record:', data);
+          if (data.tokenNo === '286') {
+            console.log('Found token 286 record:', data);
+          }
+        });
+        
+        // Now test the specific query
+        const result = await checkRsvpDownloadStatus('286');
+        console.log('Token 286 result:', result);
+        return result;
+      } catch (error) {
+        console.error('Token 286 test error:', error);
         return { error: error.message };
       }
     };
