@@ -117,7 +117,8 @@
           <div class="security-badge" style="margin-top: 8px;">
             Secure Payment Gateway
           </div>
-          <button id="checkPaymentBtn" class="btn btn-secondary" style="width: 100%; margin-top: 12px; font-size: 13px; padding: 8px 16px; background: var(--primary); color: #10210a; border: 1px solid var(--primary); display: block;">
+          <button id="checkPaymentBtn" class="btn btn-secondary"
+            style="width: 100%; margin-top: 12px; font-size: 13px; padding: 8px 16px; background: var(--primary); color: #10210a; border: 1px solid var(--primary); display: block;">
             Check Payment Status
           </button>
         </div>
@@ -142,7 +143,7 @@
       amount: '200',
       merchantName: 'MADHAVI',
       transactionNote: 'illumina Registration Fee',
-      whatsappNumber: '9739904620'
+      whatsappNumber: '7349321463'
     };
 
     // Payment state management
@@ -586,7 +587,7 @@ Please confirm my payment status.`;
         });
 
         const errorId = generateErrorId();
-        
+
         // Track validation error
         trackPaymentEvent('validation_failed', {
           errorId: errorId,
@@ -597,7 +598,7 @@ Please confirm my payment status.`;
 
         hideLoader();
         showErrorSupport(error.message, errorId);
-        
+
         // Don't auto-redirect, let user contact support
         setTimeout(() => {
           updateButtonState(PaymentState.INITIAL);
@@ -742,7 +743,7 @@ Please confirm my payment status.`;
     // Contact support via WhatsApp with error details
     function contactSupportWithError(errorId, errorMessage) {
       const userContext = getUserContext();
-      
+
       let supportMessage = `Hello! I'm experiencing a payment issue on illumina registration.
 
 Error Details:
@@ -766,7 +767,7 @@ Error Details:
 Please help me resolve this issue.`;
 
       const whatsappLink = `https://wa.me/${UPI_CONFIG.whatsappNumber}?text=${encodeURIComponent(supportMessage)}`;
-      
+
       // Track support contact
       trackPaymentEvent('support_contacted', {
         errorId,

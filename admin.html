@@ -246,16 +246,16 @@
         <label class="helper">Course</label>
         <select id="filterCourse" class="input">
           <option value="">All</option>
-          <option>PUC</option>
-          <option>Engineering</option>
-          <option>Other</option>
+          <option>PUC / 12th / ISC / CBSE</option>
+          <option>Degree / UG</option>
+          <option>PG</option>
         </select>
 
       </div>
       <div class="charts">
         <div class="chart-card"><canvas id="byDay"></canvas></div>
         <div class="chart-card"><canvas id="byCourse"></canvas></div>
-        <div class="chart-card"><canvas id="byYear"></canvas></div>
+        <div class="chart-card"><canvas id="byCollege"></canvas></div>
         <div class="chart-card"><canvas id="byCoursePct"></canvas></div>
       </div>
       <div class="table-wrap">
@@ -665,7 +665,6 @@
         });
         
         const fc = document.getElementById('filterCourse')?.value || '';
-        const fy = document.getElementById('filterYear')?.value || '';
         const q = document.getElementById('searchBox')?.value?.trim().toLowerCase() || '';
         
         const filtered = ordered.filter(r => {
@@ -688,28 +687,33 @@
         
         tbody.innerHTML = '';
         let idx = 1;
-        const byCourse = { BBA:0, BCA:0, BCOM:0, Other:0 };
-        const byYear = { '1':0, '2':0, '3':0, Other:0 };
+        const byCourse = { 'PUC / 12th / ISC / CBSE':0, 'Degree / UG':0, 'PG':0 };
+        const byCollege = {};
         
         filtered.forEach(d => {
           try {
             const tr = document.createElement('tr');
             const created = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString() : '';
             const shortIdDisplay = d.shortId || 'N/A';
-            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username||'')}</td><td>${escapeHtml(d.course||'')}</td><td>${escapeHtml(d.year||'')}</td><td>${escapeHtml(d.paymentMode||'—')}</td><td>${escapeHtml(d.college||'')}</td><td>${escapeHtml(d.ip||'')}</td><td>${escapeHtml(shortIdDisplay)}</td><td>${created}</td>`;
+            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username||'')}</td><td>${escapeHtml(d.course||'')}</td><td>${escapeHtml(d.paymentMode||'—')}</td><td>${escapeHtml(d.college||'')}</td><td>${escapeHtml(d.ip||'')}</td><td>${escapeHtml(shortIdDisplay)}</td><td>${created}</td>`;
             tbody.appendChild(tr);
             
-            const cKey = ['BBA','BCA','BCOM'].includes(d.course) ? d.course : 'Other';
-            byCourse[cKey]++;
-            const yKey = ['1','2','3'].includes(String(d.year)) ? String(d.year) : 'Other';
-            byYear[yKey]++;
+            const cKey = d.course || 'Other';
+            if (byCourse.hasOwnProperty(cKey)) {
+              byCourse[cKey]++;
+            } else {
+              byCourse['Other'] = (byCourse['Other'] || 0) + 1;
+            }
+            // Track colleges for chart
+            const college = d.college || 'Unknown';
+            byCollege[college] = (byCollege[college] || 0) + 1;
           } catch (rowError) {
             errorLog.addError('ROW_ERROR', `Failed to render row for record: ${d.id || 'unknown'}`, rowError);
           }
         });
         
         try {
-          renderCharts(byCourse, byYear);
+          renderCharts(byCourse, byCollege);
         } catch (chartError) {
           errorLog.addError('CHART_ERROR', 'Failed to render charts', chartError);
         }
@@ -728,23 +732,26 @@
     document.getElementById('filterCourse').addEventListener('change', () => {
       if (window.__lastAllRows) renderWithFilters(window.__lastAllRows);
     });
-    document.getElementById('filterYear').addEventListener('change', () => {
-      if (window.__lastAllRows) renderWithFilters(window.__lastAllRows);
-    });
+
     document.getElementById('searchBox').addEventListener('input', () => {
       if (window.__lastAllRows) renderWithFilters(window.__lastAllRows);
     });
 
     let __courseChart = null, __yearChart = null, __coursePctChart = null;
     let __byDayChart = null;
-    async function renderCharts(byCourse, byYear){
+    async function renderCharts(byCourse, byCollege){
       const { Chart } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm');
       const bd = document.getElementById('byDay');
       const cc = document.getElementById('byCourse');
-      const cy = document.getElementById('byYear');
+      const cy = document.getElementById('byCollege');
       const cp = document.getElementById('byCoursePct');
       // Color palettes
-      const courseColorMap = { BBA: '#4dabf7', BCA: '#845ef7', BCOM: '#ffa94d', Other: '#adb5bd' };
+      const courseColorMap = { 
+        'PUC / 12th / ISC / CBSE': '#4dabf7', 
+        'Degree / UG': '#845ef7', 
+        'PG': '#ffa94d', 
+        'Other': '#adb5bd' 
+      };
       const courseLabels = Object.keys(byCourse);
       const courseColors = courseLabels.map(l => courseColorMap[l] || '#74c0fc');
       const courseConfig = {
@@ -810,18 +817,17 @@
       cc.parentElement.style.height = '320px';
       __courseChart = new Chart(cc, courseConfig);
 
-      const yearLabels = Object.keys(byYear);
-      const yearColorMap = { '1': '#4dabf7', '2': '#ffa94d', '3': '#e64980', Other: '#495057' };
-      const yearColors = yearLabels.map(l => yearColorMap[l] || '#74c0fc');
+      const collegeLabels = Object.keys(byCollege).slice(0, 10); // Show top 10 colleges
+      const collegeColors = ['#4dabf7', '#ffa94d', '#e64980', '#495057', '#74c0fc', '#69db7c', '#ffd43b', '#ff8cc8', '#91a7ff', '#ffc9c9'];
 
       const yearConfig = {
         type: 'doughnut',
         data: {
-          labels: yearLabels,
+          labels: collegeLabels,
           datasets: [{
-            label: 'By Year',
-            data: Object.values(byYear),
-            backgroundColor: yearColors,
+            label: 'By College',
+            data: collegeLabels.map(label => byCollege[label]),
+            backgroundColor: collegeColors.slice(0, collegeLabels.length),
             borderColor: '#1f1f1f',
             borderWidth: 2
           }]
@@ -839,14 +845,14 @@
       cy.parentElement.style.height = '320px';
       __yearChart = new Chart(cy, yearConfig);
 
-      // Percentage by course (BBA/BCA/BCOM only)
-      const totalCount = (byCourse.BBA||0) + (byCourse.BCA||0) + (byCourse.BCOM||0);
-      const pctData = totalCount > 0 ? [byCourse.BBA||0, byCourse.BCA||0, byCourse.BCOM||0] : [0,0,0];
+      // Percentage by course
+      const totalCount = (byCourse['PUC / 12th / ISC / CBSE']||0) + (byCourse['Degree / UG']||0) + (byCourse['PG']||0);
+      const pctData = totalCount > 0 ? [byCourse['PUC / 12th / ISC / CBSE']||0, byCourse['Degree / UG']||0, byCourse['PG']||0] : [0,0,0];
       const pctColors = ['#4dabf7', '#845ef7', '#ffa94d'];
       const pctConfig = {
         type: 'pie',
         data: {
-          labels: ['BBA','BCA','BCOM'],
+          labels: ['PUC / 12th / ISC / CBSE','Degree / UG','PG'],
           datasets: [{ data: pctData, backgroundColor: pctColors, borderColor: '#1f1f1f', borderWidth: 2 }]
         },
         options: {
@@ -874,12 +880,12 @@
     document.getElementById('exportCsv').addEventListener('click', async () => {
       const q = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
       const snap = await getDocs(q);
-      const rows = [['#','username','course','year','payment','college','ip','Token No','createdAt']];
+      const rows = [['#','username','course','payment','college','ip','Token No','createdAt']];
       let i = 1;
       snap.forEach(doc => {
         const d = doc.data();
         const created = d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : '';
-        rows.push([i++, d.username||'', d.course||'', d.year||'', d.paymentMode||'', d.college||'', d.ip||'', d.shortId||'N/A', created]);
+        rows.push([i++, d.username||'', d.course||'', d.paymentMode||'', d.college||'', d.ip||'', d.shortId||'N/A', created]);
       });
 
       const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"','""') + '"').join(',')).join('\n');

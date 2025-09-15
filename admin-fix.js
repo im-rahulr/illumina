@@ -7,13 +7,13 @@ function escapeHtml(s) {
 let __courseChart = null, __yearChart = null, __coursePctChart = null;
 let __byDayChart = null;
 
-async function renderCharts(byCourse, byYear) {
+async function renderCharts(byCourse, byCollege) {
   try {
     const { Chart } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm');
     
     const bd = document.getElementById('byDay');
     const bc = document.getElementById('byCourse');
-    const by = document.getElementById('byYear');
+    const by = document.getElementById('byCollege');
     const bcp = document.getElementById('byCoursePct');
     
     if (!bd || !bc || !by || !bcp) {
@@ -203,7 +203,7 @@ async function runDiagnostics() {
   // Chart rendering test
   add('Charts Render', async () => {
     try {
-      await renderCharts({ PUC:0, Engineering:0, Other:0 }, { 'Sample':0 });
+      await renderCharts({ 'PUC / 12th / ISC / CBSE':0, 'Degree / UG':0, 'PG':0 }, { 'Sample College':0 });
       pass('Charts Render');
     } catch (e) {
       throw e;
