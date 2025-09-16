@@ -299,6 +299,13 @@ body.with-banner .container {
   text-align: left;
 }
 
+/* On individual event pages, make the info card translucent over the image */
+body.event-page .form-card {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
 .form-grid {
   display: grid;
   gap: 14px;
@@ -669,6 +676,100 @@ select.input:hover {
   border-color: var(--primary);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Event cards with background images */
+.event-card.bg {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 0;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.event-card.bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none;
+}
+
+.event-card.bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+.event-card.bg .event-name {
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.event-card.bg .event-description {
+  color: #e8e8e8;
+}
+
+.event-card.bg .event-link {
+  color: #d6f2b0;
+}
+
+/* Per-event background mappings */
+.event-product-launch { background-image: url("images/Product-launch.jpg"); }
+.event-best-manager { background-image: url("images/Best-manager.jpg"); }
+.event-debugging { background-image: url("images/Debugging.jpg"); }
+.event-coding { background-image: url("images/Debugging.jpg"); }
+.event-solo-dance { background-image: url("images/solo-dance.jpg"); }
+.event-generic { background-image: url("images/og-image.jpg"); }
+
+/* Full-page background for individual event pages */
+.event-page {
+  --event-bg: url("images/og-image.jpg");
+}
+
+/* Background image layer */
+.event-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: var(--event-bg) center/cover no-repeat fixed;
+  filter: saturate(0.9);
+}
+
+/* Dark overlay for readability */
+.event-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(1200px 800px at 50% 10%, rgba(0,0,0,0.2), rgba(0,0,0,0.7)),
+              linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.8) 100%);
+  pointer-events: none;
+}
+
+/* Map each event page to its background image */
+body.event-page.event-solo-dance { --event-bg: url("images/solo-dance.jpg"); }
+body.event-page.event-best-manager { --event-bg: url("images/Best-manager.jpg"); }
+body.event-page.event-debugging { --event-bg: url("images/Debugging.jpg"); }
+body.event-page.event-coding { --event-bg: url("images/Coding.jpg"); }
+body.event-page.event-face-painting { --event-bg: url("images/Face-painting.jpg"); }
+body.event-page.event-fireless-cooking { --event-bg: url("images/Fire(-) cook ing.jpg"); }
+body.event-page.event-general-quiz { --event-bg: url("images/General-knowledge quiz.jpg"); }
+body.event-page.event-group-dance { --event-bg: url("images/og-image.jpg"); }
+body.event-page.event-hindi-essay { --event-bg: url("images/og-image.jpg"); }
+body.event-page.event-kannada-essay { --event-bg: url("images/Kannada -essay.jpg"); }
+body.event-page.event-photography { --event-bg: url("images/Photoovvv grappyyyyeeee.jpg"); }
+body.event-page.event-product-launch { --event-bg: url("images/Product-launch.jpg"); }
+body.event-page.event-red-carpet { --event-bg: url("images/Fashionyyy shoeyyy.jpg"); }
+body.event-page.event-reels-creation { --event-bg: url("images/Reelsaaaa creationaaa.jpg"); }
+body.event-page.event-solo-instrumental { --event-bg: url("images/solo-Instrumental.jpg"); }
+body.event-page.event-solo-singing { --event-bg: url("images/solo-singing.jpg"); }
+
+.events-grid .event-card.bg {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .event-name {
