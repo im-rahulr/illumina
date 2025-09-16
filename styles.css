@@ -748,6 +748,30 @@ select.input:hover {
   pointer-events: none;
 }
 
+/* Home page background like event pages */
+body.home-page {
+  --home-bg: url("Copy of ilumina 25 rules.png");
+}
+
+body.home-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: var(--home-bg) center/cover no-repeat fixed;
+  filter: saturate(0.9);
+}
+
+body.home-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(1200px 800px at 50% 10%, rgba(0,0,0,0.2), rgba(0,0,0,0.7)),
+              linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.8) 100%);
+  pointer-events: none;
+}
+
 /* Map each event page to its background image */
 body.event-page.event-solo-dance { --event-bg: url("images/solo-dance.jpg"); }
 body.event-page.event-best-manager { --event-bg: url("images/Best-manager.jpg"); }
