@@ -373,7 +373,6 @@
         <div style="display:flex; flex-wrap:wrap; gap:8px; font-size:12px;">
           <div><strong>Name:</strong> <span id="userName"></span></div>
           <div><strong>Token:</strong> <span id="userToken"></span></div>
-          <div><strong>College:</strong> <span id="userCollege"></span></div>
         </div>
       </div>
       
@@ -623,6 +622,35 @@
       } catch (e) {
         console.warn('Unable to get user context:', e);
         return null;
+      }
+    }
+
+    // Show the Registration Details box on the payment page (without college)
+    function displayUserInfoPayment() {
+      try {
+        const user = getUserContext();
+        const userInfoBox = document.getElementById('userInfo');
+        const nameEl = document.getElementById('userName');
+        const tokenEl = document.getElementById('userToken');
+
+        if (!userInfoBox || !nameEl || !tokenEl) return;
+
+        if (user) {
+          // Populate fields
+          nameEl.textContent = user.name || '';
+          // If token is numeric, pad to 3 digits to match display like 058
+          const rawToken = user.token ?? '';
+          const paddedToken = (typeof rawToken === 'number') ? String(rawToken).padStart(3, '0') : String(rawToken);
+          tokenEl.textContent = paddedToken;
+
+          // Reveal box
+          userInfoBox.style.display = 'block';
+        } else {
+          // Hide if no context available
+          userInfoBox.style.display = 'none';
+        }
+      } catch (e) {
+        console.warn('Failed to display user info on payment page:', e);
       }
     }
 

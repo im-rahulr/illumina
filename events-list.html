@@ -407,6 +407,22 @@
       }
     }
 
+    // Check if user already submitted events; if yes, skip this page
+    function enforceSubmissionLock() {
+      try {
+        const token = sessionStorage.getItem('lastToken');
+        const lockedToken = sessionStorage.getItem('events_submitted_token');
+        if (token && lockedToken && token === lockedToken) {
+          // Already submitted, redirect to success page
+          window.location.replace('success.html');
+          return true;
+        }
+      } catch (e) {
+        console.warn('Lock check failed:', e);
+      }
+      return false;
+    }
+
     // Display user information
     function displayUserInfo() {
       userContext = getUserContext();
@@ -576,7 +592,13 @@
         }));
 
         hideLoader();
-        
+
+        // Set submission lock so user cannot come back and resubmit
+        try {
+          sessionStorage.setItem('events_submitted_token', userContext.token);
+          sessionStorage.setItem('events_submitted_time', String(Date.now()));
+        } catch (e) { console.warn('Failed to set submission lock:', e); }
+
         // Redirect to final step page
         window.location.href = 'success.html';
 
@@ -593,11 +615,19 @@
 
     // Initialize page
     function init() {
+      // If already submitted, redirect to success immediately
+      if (enforceSubmissionLock()) return;
+
       displayUserInfo();
       renderEvents();
       
       // Add proceed button handler
       proceedBtn.addEventListener('click', proceedToPayment);
+
+      // Handle back-forward cache returns: re-check lock and redirect if needed
+      window.addEventListener('pageshow', () => {
+        enforceSubmissionLock();
+      });
     }
 
     // Start the application

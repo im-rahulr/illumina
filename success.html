@@ -431,6 +431,23 @@
     </div>
   </div>
 
+  <!-- Navigation guard to prevent going back to events selection after submission -->
+  <script>
+    (function(){
+      try {
+        // Push a new state so the first Back stays on this page
+        history.pushState(null, '', location.href);
+        window.addEventListener('popstate', function(){
+          // If submission lock exists, keep the user on success page
+          const locked = sessionStorage.getItem('events_submitted_token');
+          if (locked) {
+            history.pushState(null, '', location.href);
+          }
+        });
+      } catch (e) { /* no-op */ }
+    })();
+  </script>
+
   <!-- WhatsApp Helper Message -->
   <div id="whatsappHelperMessage" class="whatsapp-helper-message">
     <div class="helper-bubble">
