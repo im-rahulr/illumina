@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20240916">
+  <link rel="stylesheet" href="styles.css?v=20240917">
   <style>
     /* WhatsApp Widget Styles */
     .whatsapp-widget {
@@ -221,7 +221,7 @@
       <a href="index.html"><img src="images/lowrylogo.png" alt="ILLUMINA Logo"></a>
     </div>
     <h1 class="title">ILUMINA 2025</h1>
-    <p class="subtitle">@ Lowry Adventist College</p>
+    <p class="subtitle">At Lowry Adventist College</p>
 
     <div class="countdown" aria-live="polite">
       <div class="count-box"><div id="dd" class="count-num">0</div><div class="count-label">Days</div></div>
@@ -230,7 +230,7 @@
       <div class="count-box"><div id="ss" class="count-num">0</div><div class="count-label">Seconds</div></div>
     </div>
 
-    <p class="meta">Event on 25 Sep 2025 • Rapid time control • Limited seats</p>
+    <p class="meta">Event on 25 Sep 2025 • Entry Fee: ₹250 • Limited seats</p>
 
     <a id="registerBtn" class="btn btn-primary" href="register.html" role="button">Register Now</a>
 
@@ -457,7 +457,8 @@
         console.warn('Banner error:', e);
       }
 
-      var target = new Date('2025-09-25T00:00:00');
+      // Set target to September 25, 2025, 12:00 PM IST (07:30 UTC)
+      var target = new Date('2025-09-25T07:30:00Z');
       function update(){
         try {
           var now = new Date();
