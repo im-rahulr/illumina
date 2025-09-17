@@ -172,6 +172,7 @@
       opacity: 0.8;
     }
 
+
     .whatsapp-close {
       background: none;
       border: none;
@@ -313,6 +314,40 @@
         transform: translateY(0);
       }
     }
+
+    /* Mobile responsive styles */
+    @media (max-width: 767px) {
+      .container {
+        padding: 0 12px;
+      }
+      
+      .form-card {
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      
+      #eventSelections h3 {
+        font-size: 16px;
+      }
+      
+      .summary-item {
+        font-size: 13px;
+        padding: 6px 0;
+      }
+      
+      .btn {
+        font-size: 14px;
+        padding: 12px 16px;
+      }
+      
+      .title {
+        font-size: 24px;
+      }
+      
+      .subtitle {
+        font-size: 14px;
+      }
+    }
   </style>
   <meta name="description" content="Pay your registration fee online via UPI." />
   <!-- Google tag (gtag.js) -->
@@ -330,9 +365,18 @@
   <main class="container" role="main"
     style="min-height:100vh; padding: 24px 0; display: flex; align-items: center; justify-content: center;">
     <div style="max-width: 400px; margin: 0 auto; padding: 0 16px; width: 100%;">
-      <h1 class="title" style="text-align: center; margin-bottom: 4px;">Pay ₹250</h1>
+      <h1 class="title" style="text-align: center; margin-bottom: 4px;" id="paymentTitle">Pay ₹250</h1>
       <p class="subtitle" style="text-align: center; margin-top: 0;">Scan the QR code to pay using any UPI app</p>
-
+      <!-- User Details (from session) -->
+      <div id="userInfo" style="display:none; background: rgba(123, 191, 68, 0.1); border: 1px solid var(--primary); border-radius: 8px; padding: 12px; margin: 12px 0;">
+        <h3 style="margin: 0 0 6px 0; color: var(--primary); font-size: 14px;">Registration Details</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; font-size:12px;">
+          <div><strong>Name:</strong> <span id="userName"></span></div>
+          <div><strong>Token:</strong> <span id="userToken"></span></div>
+          <div><strong>College:</strong> <span id="userCollege"></span></div>
+        </div>
+      </div>
+      
       <section class="form-card"
         style="background: var(--surface); border:1px solid var(--line); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
         <div style="text-align: center;">
@@ -373,7 +417,7 @@
       </section>
 
       <div style="text-align: center; margin-top: 16px;">
-        <a href="success.html" class="login-link" style="font-size: 14px;">← Back to registration</a>
+        <a href="events-list.html" class="login-link" style="font-size: 14px;">← Back to Events Selection</a>
       </div>
     </div>
   </main>
@@ -454,6 +498,22 @@
       transactionNote: 'ILLUMINA Registration Fee',
       whatsappNumber: '7349321463'
     };
+
+    // Load event selections and update payment amount (no UI list)
+    function loadEventSelections() {
+      try {
+        const totalAmount = '250'; // Fixed amount
+        UPI_CONFIG.amount = totalAmount;
+        // Update page title to show fixed amount
+        const titleEl = document.getElementById('paymentTitle');
+        if (titleEl) titleEl.textContent = `Pay ₹${totalAmount}`;
+        // Update transaction note using user context
+        const userContext = getUserContext();
+        UPI_CONFIG.transactionNote = `Token ${userContext?.token || 'N/A'} ILLUMINA Registration`;
+      } catch (e) {
+        console.warn('Unable to initialize payment amount:', e);
+      }
+    }
 
     // Payment state management
     const PaymentState = {
@@ -878,6 +938,19 @@ Please confirm my payment status.`;
       updateButtonState(PaymentState.INITIAL);
     }
 
+    // Initialize payment page
+    function initPaymentPage() {
+      loadEventSelections();
+      
+      // Check if user has valid context
+      const userContext = getUserContext();
+      if (!userContext) {
+        alert('Please complete registration and event selection first.');
+        window.location.href = 'register.html';
+        return;
+      }
+    }
+
     // Show payment status message
     function showPaymentStatusMessage() {
       const messageDiv = document.createElement('div');
@@ -1078,6 +1151,9 @@ Please confirm my payment status.`;
     document.addEventListener('DOMContentLoaded', () => {
       // Show loading animation when page loads
       showInitialLoader();
+      // Show user details box
+      displayUserInfoPayment();
+
       // Check user context from registration flow
       try {
         const userContext = sessionStorage.getItem('payment_user_context');
@@ -1405,6 +1481,9 @@ Please help me resolve this issue.`;
         });
       });
     })();
+
+    // Initialize the payment page when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initPaymentPage);
   </script>
 </body>
 

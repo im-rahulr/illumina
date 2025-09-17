@@ -340,6 +340,7 @@
               <th>Username</th>
               <th>Phone</th>
               <th>Course</th>
+              <th>Events</th>
               <th>Payment</th>
               <th>College</th>
               <th>IP</th>
@@ -376,6 +377,33 @@
     import { collection, getDocs, query, orderBy, onSnapshot, limit, where } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
     // db is imported from firebase-config.js
+
+    // Cache for event selections by user token (shortId)
+    let __eventSelectionsByToken = new Map();
+
+    function startEventSelectionsListener() {
+      try {
+        const esRef = collection(db, 'eventSelections');
+        onSnapshot(esRef, (snap) => {
+          const map = new Map();
+          snap.forEach(doc => {
+            const d = doc.data();
+            if (d && d.userToken) {
+              map.set(String(d.userToken), { id: doc.id, ...d });
+            }
+          });
+          __eventSelectionsByToken = map;
+          // Re-render table if we already have rows
+          if (window.__lastAllRows) {
+            try { renderWithFilters(window.__lastAllRows); } catch {}
+          }
+        }, (err) => {
+          errorLog.addError('EVENT_SEL_LISTEN_ERROR', 'Failed to listen to eventSelections', err);
+        });
+      } catch (e) {
+        errorLog.addError('EVENT_SEL_INIT_ERROR', 'Could not initialize eventSelections listener', e);
+      }
+    }
 
     // Announcement banner logic
     try {
@@ -422,6 +450,9 @@
         if (mainEl) mainEl.classList.add('is-logged-in');
         try {
           await initDataFeed();
+          // Listen to event selections in real-time so Events column stays updated
+          startEventSelectionsListener();
+
           // Start a light real-time feed for errorLogs so admins see user issues immediately
           try {
             const errRef = query(collection(db, 'errorLogs'), orderBy('timestamp', 'desc'));
@@ -860,11 +891,28 @@
               rsvpCell.innerHTML = '<span style="color: var(--muted); font-size: 12px;">No Token</span>';
             }
 
-            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username || '')}</td><td>${escapeHtml(d.phone || '—')}</td><td>${escapeHtml(d.course || '')}</td><td>${escapeHtml(d.paymentMode || '—')}</td><td>${escapeHtml(d.college || '')}</td><td>${escapeHtml(d.ip || '')}</td><td>${escapeHtml(shortIdDisplay)}</td><td></td><td>${created}</td>`;
+            // Format event selections for display
+            let eventsDisplay = '—';
+            let eventsArray = [];
+            if (d.eventSelections && Array.isArray(d.eventSelections) && d.eventSelections.length > 0) {
+              eventsArray = d.eventSelections;
+            } else if (d.shortId && __eventSelectionsByToken && __eventSelectionsByToken.has(String(d.shortId))) {
+              const es = __eventSelectionsByToken.get(String(d.shortId));
+              if (es && Array.isArray(es.selections)) {
+                eventsArray = es.selections;
+              }
+            }
+
+            if (eventsArray.length > 0) {
+              const eventsList = eventsArray.map(ev => `${ev.eventTitle || ev.eventId} ${ev.quantity ? '('+ev.quantity+')' : ''}`.trim()).join(', ');
+              eventsDisplay = `<div title="${eventsList}">${eventsList}</div>`;
+            }
+
+            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username || '')}</td><td>${escapeHtml(d.phone || '—')}</td><td>${escapeHtml(d.course || '')}</td><td>${eventsDisplay}</td><td>${escapeHtml(d.paymentMode || '—')}</td><td>${escapeHtml(d.college || '')}</td><td>${escapeHtml(d.ip || '')}</td><td>${escapeHtml(shortIdDisplay)}</td><td></td><td>${created}</td>`;
 
             // Replace the empty RSVP cell with our generated one
             const cells = tr.querySelectorAll('td');
-            tr.replaceChild(rsvpCell, cells[8]); // Replace the 9th cell (RSVP Status column)
+            tr.replaceChild(rsvpCell, cells[9]); // Replace the 10th cell (RSVP Status column)
 
             tbody.appendChild(tr);
 

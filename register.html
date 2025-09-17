@@ -360,16 +360,18 @@
         console.log('Registration stored successfully with Token No:', shortId);
         
         if (btnLabel) btnLabel.textContent = 'Submitted';
-        // Persist token and name to session and redirect to success page
+        // Persist user data to session and redirect to events selection page
         try {
           sessionStorage.setItem('lastToken', shortId);
           sessionStorage.setItem('lastName', payload.username || '');
+          sessionStorage.setItem('lastCollege', payload.college || '');
+          sessionStorage.setItem('lastCourse', payload.course || '');
         } catch {}
         // Optional celebration before redirect
         playSuccessSound();
         burstEmojis();
-        // Quick redirect to success page (keep loader visible until navigation)
-        window.location.href = 'success.html';
+        // Quick redirect to events selection page (keep loader visible until navigation)
+        window.location.href = 'events-list.html';
       } catch (err) {
         console.error('Registration error:', err);
         

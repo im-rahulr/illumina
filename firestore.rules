@@ -17,11 +17,11 @@ service cloud.firestore {
         request.resource.data.shortId is string &&
         request.resource.data.shortId.matches('^\\d{3}$') &&
         request.resource.data.ip is string &&
-        request.resource.data.keys().hasOnly(['username','course','college','phone','ip','shortId','createdAt']);
+        request.resource.data.keys().hasOnly(['username','course','college','phone','ip','shortId','createdAt','hasSelectedEvents','eventSelectionId']);
 
-      /* allow updating payment and RSVP fields only */
+      /* allow updating payment, RSVP, and event selection fields */
       allow update: if
-        request.resource.data.diff(resource.data).changedKeys().hasOnly(['paymentMode','paymentAt','rsvpDownloaded','rsvpDownloadedAt','adminGenerated','paymentUpdatedAt','paymentUpdatedBy']) &&
+        request.resource.data.diff(resource.data).changedKeys().hasOnly(['paymentMode','paymentAt','rsvpDownloaded','rsvpDownloadedAt','adminGenerated','paymentUpdatedAt','paymentUpdatedBy','hasSelectedEvents','eventSelectionId','eventSelections','totalAmount','eventSelectionTimestamp']) &&
         (request.resource.data.paymentMode == null || request.resource.data.paymentMode in ['onspot','online']);
 
       /* prevent deletes from the public */
@@ -56,6 +56,33 @@ service cloud.firestore {
                      request.resource.data.keys().hasOnly(['tokenNo','username','paymentMode','downloadedAt','downloadType']);
       allow read: if true; // for admin panel access
       allow update, delete: if false;
+    }
+
+    /* Event Selections: allow create and read for event selection flow */
+    match /eventSelections/{docId} {
+      allow create: if request.resource.data.userId is string &&
+                     request.resource.data.userToken is string &&
+                     request.resource.data.userToken.matches('^\\d{3}$') &&
+                     request.resource.data.selections is list &&
+                     request.resource.data.totalAmount is number &&
+                     request.resource.data.totalAmount >= 0 &&
+                     request.resource.data.paymentStatus in ['pending', 'completed', 'failed'] &&
+                     request.resource.data.keys().hasOnly(['userId','userToken','selections','totalAmount','createdAt','updatedAt','paymentStatus']);
+      
+      allow read: if true; // for admin panel access
+      
+      /* allow updating payment status only */
+      allow update: if request.resource.data.diff(resource.data).changedKeys().hasOnly(['paymentStatus','updatedAt']) &&
+                     request.resource.data.paymentStatus in ['pending', 'completed', 'failed'];
+      
+      allow delete: if false;
+    }
+
+    /* Events Master Data: allow read for event selection page */
+    match /events/{docId} {
+      allow read: if true; // public read access for event selection
+      allow create, update: if false; // only admin should manage events via console
+      allow delete: if false;
     }
 
     /* Deny everything else by default */
