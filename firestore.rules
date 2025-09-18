@@ -21,8 +21,13 @@ service cloud.firestore {
 
       /* allow updating payment, RSVP, and event selection fields */
       allow update: if
-        request.resource.data.diff(resource.data).changedKeys().hasOnly(['paymentMode','paymentAt','rsvpDownloaded','rsvpDownloadedAt','adminGenerated','paymentUpdatedAt','paymentUpdatedBy','hasSelectedEvents','eventSelectionId','eventSelections','totalAmount','eventSelectionTimestamp']) &&
-        (request.resource.data.paymentMode == null || request.resource.data.paymentMode in ['onspot','online']);
+        request.resource.data.diff(resource.data).changedKeys().hasOnly(['paymentMode','paymentAt','rsvpDownloaded','rsvpDownloadedAt','adminGenerated','paymentUpdatedAt','paymentUpdatedBy','hasSelectedEvents','eventSelectionId','eventSelections','totalAmount','eventSelectionTimestamp','paymentApproved','paymentApprovedAt','paymentApprovedBy','paymentType','transactionId','receiptNo']) &&
+        (request.resource.data.paymentMode == null || request.resource.data.paymentMode in ['onspot','online']) &&
+        (request.resource.data.paymentApproved == null || request.resource.data.paymentApproved is bool) &&
+        (request.resource.data.paymentApprovedBy == null || request.resource.data.paymentApprovedBy is string) &&
+        (request.resource.data.paymentType == null || request.resource.data.paymentType in ['cash','upi']) &&
+        (request.resource.data.transactionId == null || request.resource.data.transactionId is string) &&
+        (request.resource.data.receiptNo == null || request.resource.data.receiptNo is string);
 
       /* prevent deletes from the public */
       allow delete: if false;
