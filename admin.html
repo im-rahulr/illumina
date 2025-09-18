@@ -171,36 +171,6 @@
       transform: scale(1.1);
       box-shadow: 0 4px 12px rgba(123, 191, 68, 0.4);
     }
-
-    /* Payment approval button styles */
-    .approve-payment-btn {
-      transition: all 0.2s ease !important;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-    }
-
-    .approve-payment-btn:hover {
-      background: #218838 !important;
-      transform: translateY(-1px) !important;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
-    }
-
-    .approve-payment-btn:active {
-      transform: translateY(0) !important;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-    }
-
-    /* Payment details styling */
-    .payment-details {
-      font-size: 10px !important;
-      color: #6c757d !important;
-      margin-top: 2px !important;
-      font-weight: 500 !important;
-    }
-
-    /* Enhanced table cell styling for payment status */
-    .admin-panel table td {
-      vertical-align: middle !important;
-    }
   </style>
   <meta name="description" content="Admin panel for illumina registrations.">
   <!-- Open Graph / WhatsApp / Facebook -->
@@ -372,7 +342,6 @@
               <th>Course</th>
               <th>Events</th>
               <th>Payment</th>
-              <th>Payment Status</th>
               <th>College</th>
               <th>IP</th>
               <th>Token No</th>
@@ -939,53 +908,11 @@
               eventsDisplay = `<div title="${eventsList}">${eventsList}</div>`;
             }
 
-            // Create payment approval cell
-            const paymentApprovalCell = document.createElement('td');
-            paymentApprovalCell.style.textAlign = 'center';
-            paymentApprovalCell.style.padding = '8px';
-            
-            const isApproved = d.paymentApproved === true;
-            const approvalStatus = isApproved ? 'approved' : 'pending';
-            const approvalText = isApproved ? '✅ Approved' : '⏳ Pending';
-            const approvalColor = isApproved ? '#28a745' : '#ffc107';
-            
-            // Build payment details for approved payments
-            let paymentDetails = '';
-            if (isApproved) {
-              const paymentType = d.paymentType ? d.paymentType.toUpperCase() : '';
-              const reference = d.paymentType === 'cash' ? d.receiptNo : d.transactionId;
-              if (paymentType && reference) {
-                paymentDetails = `<div style="font-size: 10px; color: #6c757d; margin-top: 2px;">${paymentType}: ${reference}</div>`;
-              }
-            }
-            
-            paymentApprovalCell.innerHTML = `
-              <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                <span style="color: ${approvalColor}; font-weight: 600; font-size: 12px;">${approvalText}</span>
-                ${paymentDetails}
-                ${!isApproved ? `<button class="approve-payment-btn" data-doc-id="${doc.id}" data-username="${escapeHtml(d.username || '')}" style="padding: 2px 8px; font-size: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Approve</button>` : ''}
-              </div>
-            `;
+            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username || '')}</td><td>${escapeHtml(d.phone || '—')}</td><td>${escapeHtml(d.course || '')}</td><td>${eventsDisplay}</td><td>${escapeHtml(d.paymentMode || '—')}</td><td>${escapeHtml(d.college || '')}</td><td>${escapeHtml(d.ip || '')}</td><td>${escapeHtml(shortIdDisplay)}</td><td></td><td>${created}</td>`;
 
-            tr.innerHTML = `<td>${idx++}</td><td>${escapeHtml(d.username || '')}</td><td>${escapeHtml(d.phone || '—')}</td><td>${escapeHtml(d.course || '')}</td><td>${eventsDisplay}</td><td>${escapeHtml(d.paymentMode || '—')}</td><td></td><td></td><td>${escapeHtml(d.college || '')}</td><td>${escapeHtml(d.ip || '')}</td><td>${escapeHtml(shortIdDisplay)}</td><td></td><td>${created}</td>`;
-
-            // Replace the empty cells with our generated ones
+            // Replace the empty RSVP cell with our generated one
             const cells = tr.querySelectorAll('td');
-            tr.replaceChild(paymentApprovalCell, cells[6]); // Replace the 7th cell (Payment Status column)
-            
-            // Create actions cell with approval button
-            const actionsCell = document.createElement('td');
-            actionsCell.style.textAlign = 'center';
-            actionsCell.style.padding = '8px';
-            
-            if (!isApproved) {
-              actionsCell.innerHTML = `<button class="approve-payment-btn" data-doc-id="${doc.id}" data-username="${escapeHtml(d.username || '')}" style="padding: 4px 8px; font-size: 11px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Approve Payment</button>`;
-            } else {
-              actionsCell.innerHTML = `<span style="color: #6c757d; font-size: 11px;">Approved</span>`;
-            }
-            
-            tr.replaceChild(actionsCell, cells[7]); // Replace the 8th cell (Actions column)
-            tr.replaceChild(rsvpCell, cells[11]); // Replace the 12th cell (RSVP Status column)
+            tr.replaceChild(rsvpCell, cells[9]); // Replace the 10th cell (RSVP Status column)
 
             tbody.appendChild(tr);
 
@@ -1171,7 +1098,7 @@
     document.getElementById('exportCsv').addEventListener('click', async () => {
       const q = query(collection(db, 'registrations'), orderBy('createdAt', 'desc'));
       const snap = await getDocs(q);
-      const rows = [['#', 'username', 'phone', 'course', 'payment', 'payment_approved', 'payment_type', 'reference_no', 'college', 'ip', 'Token No', 'RSVP Downloaded', 'createdAt']];
+      const rows = [['#', 'username', 'phone', 'course', 'payment', 'college', 'ip', 'Token No', 'RSVP Downloaded', 'createdAt']];
       let i = 1;
       // Create an array to store promises for RSVP status checks
       const rsvpPromises = [];
@@ -1195,10 +1122,7 @@
       docData.forEach((d, index) => {
         const created = d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : '';
         const rsvpStatus = rsvpStatuses[index].downloaded ? 'Yes' : 'No';
-        const paymentApproved = d.paymentApproved === true ? 'Approved' : 'Pending';
-        const paymentType = d.paymentType || '';
-        const referenceNo = d.paymentType === 'cash' ? (d.receiptNo || '') : (d.transactionId || '');
-        rows.push([i++, d.username || '', d.phone || '', d.course || '', d.paymentMode || '', paymentApproved, paymentType, referenceNo, d.college || '', d.ip || '', d.shortId || 'N/A', rsvpStatus, created]);
+        rows.push([i++, d.username || '', d.phone || '', d.course || '', d.paymentMode || '', d.college || '', d.ip || '', d.shortId || 'N/A', rsvpStatus, created]);
       });
 
       const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"', '""') + '"').join(',')).join('\n');
@@ -1699,114 +1623,6 @@
         console.error('Token 286 test error:', error);
         return { error: error.message };
       }
-    };
-
-    // Payment approval functionality
-    async function approvePayment(docId, username) {
-      const APPROVAL_PASSWORD = '2025';
-      
-      try {
-        // Step 1: Ask for password
-        const password = prompt(`🔐 Enter admin password to approve payment for ${username}:`);
-        
-        if (password !== APPROVAL_PASSWORD) {
-          alert('❌ Invalid password. Payment approval cancelled.');
-          return;
-        }
-        
-        // Step 2: Ask for payment type
-        const paymentType = prompt(`💳 Select payment type for ${username}:\n\n1️⃣ Cash\n2️⃣ UPI\n\nEnter 1 or 2:`);
-        
-        if (!paymentType || (paymentType !== '1' && paymentType !== '2')) {
-          alert('❌ Invalid payment type selection. Payment approval cancelled.');
-          return;
-        }
-        
-        const paymentMethod = paymentType === '1' ? 'cash' : 'upi';
-        const referenceLabel = paymentMethod === 'cash' ? 'Receipt Number' : 'Transaction ID (last 4 digits)';
-        const icon = paymentMethod === 'cash' ? '💵' : '📱';
-        
-        // Step 3: Ask for transaction/receipt reference
-        const reference = prompt(`${icon} Enter ${referenceLabel} for ${username}:\n\n⚠️ Must be exactly 4 digits`);
-        
-        if (!reference || reference.length !== 4 || !/^\d{4}$/.test(reference)) {
-          alert('❌ Invalid reference number. Must be exactly 4 digits. Payment approval cancelled.');
-          return;
-        }
-        
-        // Step 4: Confirm before saving
-        const confirmMessage = `✅ Confirm Payment Approval:\n\n👤 User: ${username}\n💳 Type: ${paymentMethod.toUpperCase()}\n🔢 ${referenceLabel}: ${reference}\n\nProceed with approval?`;
-        
-        if (!confirm(confirmMessage)) {
-          alert('❌ Payment approval cancelled by admin.');
-          return;
-        }
-        
-        // Step 5: Update Firebase
-        const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
-        
-        // Prepare update data
-        const updateData = {
-          paymentApproved: true,
-          paymentApprovedAt: new Date(),
-          paymentApprovedBy: 'admin',
-          paymentType: paymentMethod
-        };
-        
-        // Add appropriate reference field
-        if (paymentMethod === 'cash') {
-          updateData.receiptNo = reference;
-        } else {
-          updateData.transactionId = reference;
-        }
-        
-        // Update the document in Firebase
-        const docRef = doc(db, 'registrations', docId);
-        await updateDoc(docRef, updateData);
-        
-        console.log(`✅ Payment approved for user: ${username} (${docId})`, updateData);
-        alert(`🎉 Payment approved successfully!\n\n👤 User: ${username}\n💳 Type: ${paymentMethod.toUpperCase()}\n🔢 ${referenceLabel}: ${reference}\n\n✅ Database updated successfully!`);
-        
-        // The real-time listener will automatically update the UI
-        
-      } catch (error) {
-        console.error('❌ Error approving payment:', error);
-        alert(`❌ Failed to approve payment: ${error.message}\n\nPlease try again or check the console for details.`);
-      }
-    }
-
-    // Add event listener for payment approval buttons (using event delegation)
-    document.addEventListener('click', function(e) {
-      if (e.target && e.target.classList.contains('approve-payment-btn')) {
-        const docId = e.target.getAttribute('data-doc-id');
-        const username = e.target.getAttribute('data-username');
-        
-        if (docId && username) {
-          approvePayment(docId, username);
-        }
-      }
-    });
-
-    // Test function for payment approval system
-    window.testPaymentApproval = function() {
-      console.log('🧪 Testing Payment Approval System...');
-      console.log('✅ Payment approval function is loaded');
-      console.log('✅ Event listeners are attached');
-      console.log('✅ Firebase rules include payment approval fields');
-      console.log('✅ CSV export includes payment type and reference');
-      console.log('🎯 System ready for payment approvals!');
-      
-      // Test data structure
-      const testData = {
-        paymentApproved: true,
-        paymentApprovedAt: new Date(),
-        paymentApprovedBy: 'admin',
-        paymentType: 'upi',
-        transactionId: '1234'
-      };
-      
-      console.log('📋 Sample approval data structure:', testData);
-      return testData;
     };
 
     function escapeHtml(s) {
